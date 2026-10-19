@@ -26,6 +26,7 @@ FV.CAPITOLI=[
 ];
 FV.SIMULATORE='https://massimilianopetra.github.io/flightsimulator/';
 FV.CODICE='https://github.com/massimilianopetra/flightsimulator/blob/main/';
+FV.MANUALE='https://massimilianopetra.github.io/flightsimulator/istruzioni.html';
 
 const inCapitoli=/\/capitoli\//.test(location.pathname.replace(/\\/g,'/'));
 const base=inCapitoli?'../':'';
@@ -36,7 +37,8 @@ function impagina(){
   const main=document.querySelector('main');if(!main) return;
   const testata=document.createElement('header');testata.className='testata';
   testata.innerHTML=`<div class="dentro"><a class="marchio" href="${base}index.html">Fisica del <span>volo</span></a>
-    <nav><a href="${base}index.html">Indice</a><a href="${FV.SIMULATORE}" target="_blank" rel="noopener">Il simulatore ↗</a></nav></div>`;
+    <nav><a href="${base}index.html">Indice</a><a href="${FV.MANUALE}" target="_blank" rel="noopener">Manuale del gioco ↗</a>
+    <a class="vola" href="${FV.SIMULATORE}" target="_blank" rel="noopener">✈ Vola con il simulatore</a></nav></div>`;
   const pagina=document.createElement('div');pagina.className='pagina';
   const indice=document.createElement('aside');indice.className='indice';
   indice.innerHTML='<ol>'+FV.CAPITOLI.map((c,i)=>{
@@ -55,7 +57,8 @@ function impagina(){
     main.appendChild(nav);
   }
   const piede=document.createElement('footer');
-  piede.innerHTML='Fisica del volo — la teoria dietro il simulatore <a href="'+FV.SIMULATORE+'" target="_blank" rel="noopener">Volo</a>. '+
+  piede.innerHTML='Fisica del volo — la teoria dietro il simulatore <a href="'+FV.SIMULATORE+'" target="_blank" rel="noopener">Volo</a> '+
+    '(<a href="'+FV.MANUALE+'" target="_blank" rel="noopener">manuale del gioco</a>, <a href="https://github.com/massimilianopetra/flightsimulator" target="_blank" rel="noopener">codice</a>). '+
     'Formule disegnate con KaTeX (licenza MIT), caratteri B612 (SIL OFL).';
   document.body.appendChild(piede);
   // collegamenti al codice del simulatore: <a data-codice="js/fisica.js#L97">
