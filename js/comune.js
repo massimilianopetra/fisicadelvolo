@@ -59,7 +59,7 @@ function impagina(){
   const piede=document.createElement('footer');
   piede.innerHTML='Fisica del volo — la teoria dietro il simulatore <a href="'+FV.SIMULATORE+'" target="_blank" rel="noopener">Volo</a> '+
     '(<a href="'+FV.MANUALE+'" target="_blank" rel="noopener">manuale del gioco</a>, <a href="https://github.com/massimilianopetra/flightsimulator" target="_blank" rel="noopener">codice</a>). '+
-    '© 2026 Massimiliano Petra · testi e figure con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · '+
+    '© 2026 Massimiliano Petra · <a href="mailto:massimiliano.petra@gmail.com">massimiliano.petra@gmail.com</a> · testi e figure con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · '+
     'formule disegnate con KaTeX (licenza MIT), caratteri B612 (SIL OFL).';
   document.body.appendChild(piede);
   // collegamenti al codice del simulatore: <a data-codice="js/fisica.js#L97">

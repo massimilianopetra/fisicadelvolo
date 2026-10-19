@@ -50,6 +50,8 @@ aside.indice .num{display:inline-block;width:1.8em;font-family:"B612 Mono",monos
 main{padding:26px 0 60px;min-width:0}
 main>h1{font-size:2rem;line-height:1.2;margin:.2em 0 .1em}
 .sottotitolo{color:var(--tenue);margin:0 0 1.6em;font-size:1.05rem}
+.sottotitolo:has(+ .autore){margin-bottom:.3em}
+.autore{margin:0 0 1.6em;font-size:.95rem;color:var(--tenue)}
 h2{font-size:1.35rem;margin:2em 0 .5em;padding-top:.3em;border-top:1px solid var(--linea)}
 h3{font-size:1.08rem;margin:1.5em 0 .4em}
 p,li{max-width:46em}

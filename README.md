@@ -4,6 +4,8 @@ La teoria dietro il simulatore di volo **[Volo](https://massimilianopetra.github
 
 Pensato per gli **istituti tecnici** (in particolare l'indirizzo Trasporti e logistica – Costruzioni aeronautiche e Conduzione del mezzo aereo): bastano trigonometria, vettori e un'idea di derivata.
 
+Un progetto di **Massimiliano Petra** — contatti: [massimiliano.petra@gmail.com](mailto:massimiliano.petra@gmail.com). Le scuole che vogliono usarlo in classe, segnalare errori o proporre miglioramenti possono scrivere a questo indirizzo.
+
 ## Contenuto
 
 | Capitolo | Argomento | Laboratorio interattivo |
