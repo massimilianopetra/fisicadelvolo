@@ -39,7 +39,7 @@ img/                immagini prese dal simulatore
 
 ## Licenze
 
+- **Testi, figure, laboratori e codice di queste pagine**: © 2026 Massimiliano Petra, licenza [Creative Commons Attribuzione – Condividi allo stesso modo 4.0 Internazionale (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/deed.it) (testo completo in `LICENSE`). Si possono copiare, stampare, modificare e usare in classe, anche per lavori derivati, citando l'autore e mantenendo la stessa licenza.
+- Gli estratti di codice del simulatore Volo riportati nei capitoli restano sotto la sua licenza, GPL-3.0-or-later; anche `js/c172.js` è una copia di un file del simulatore.
 - KaTeX: licenza MIT (`lib/katex/LICENSE`).
 - Caratteri B612: SIL Open Font License 1.1 (`font/OFL.txt`).
-- Il simulatore Volo è distribuito con licenza GPL-3.0-or-later.
-- Testi e figure di queste pagine: licenza da scegliere (vedi `CLAUDE.md`).
