@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L'atmosfera e le velocità — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>L'atmosfera e le velocità</h1>
+<p class="sottotitolo">L'aereo vola nell'aria: quanta ce n'è, e quanto velocemente gli arriva addosso, decide tutto il resto.</p>
+
+<h2>L'atmosfera standard</h2>
+<p>La densità dell'aria cambia con la quota, la temperatura e il tempo. Per confrontare le prestazioni degli aerei si usa un'atmosfera "media" di riferimento, l'<b>atmosfera standard internazionale</b> (ISA): al livello del mare \(T_0=288{,}15\) K (15 °C), \(p_0=101\,325\) Pa, \(\rho_0=1{,}225\ \text{kg/m}^3\); fino a 11 km la temperatura cala di 6,5 °C ogni 1000 m.</p>
+
+<h3>Da dove viene la formula</h3>
+<p>Due leggi bastano. L'<b>equilibrio idrostatico</b>: salendo di \(dh\), la pressione cala del peso della colonnina d'aria,</p>
+$$dp=-\rho\,g\,dh,$$
+<p>e l'<b>equazione dei gas</b> \(p=\rho R T\) con \(R=287\ \text{J/(kg·K)}\). Con \(T=T_0-\lambda h\) (\(\lambda=0{,}0065\) K/m) si separano le variabili e si integra:</p>
+$$\frac{dp}{p}=-\frac{g}{R}\,\frac{dh}{T_0-\lambda h}\quad\Longrightarrow\quad \frac{p}{p_0}=\left(1-\frac{\lambda h}{T_0}\right)^{\frac{g}{R\lambda}}$$
+<p>Il rapporto \(\lambda/T_0=2{,}2558\cdot10^{-5}\ \text{m}^{-1}\) e l'esponente \(g/(R\lambda)\approx5{,}2559\). Dividendo per \(T/T_0\) si ottiene la densità:</p>
+<div class="box formula">
+  <div class="titolo">Densità dell'aria (ISA, troposfera)</div>
+  $$\rho(h)=\rho_0\left(1-2{,}2558\cdot10^{-5}\,h\right)^{4{,}2559}\qquad(h\ \text{in metri})$$
+  <p>A 1500 m la densità è l'86% di quella al suolo, a 3000 m il 74%, a 5500 m circa la metà.</p>
+</div>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — densità, quota e velocità</div>
+  <canvas id="cvAtm"></canvas>
+  <div class="comandi">
+    <label>Quota <input type="range" id="h" min="0" max="6000" step="50" value="1500"><output for="h"></output></label>
+    <label>Velocità indicata <input type="range" id="ias" min="40" max="160" step="1" value="100"><output for="ias"></output></label>
+  </div>
+  <div class="risultati">
+    <span>temperatura <b id="r-t"></b></span><span>pressione <b id="r-p"></b></span>
+    <span>densità <b id="r-r"></b></span><span>velocità vera <b id="r-tas"></b></span>
+  </div>
+</div>
+
+<h2>La pressione dinamica</h2>
+<p>Se l'aria arriva sull'aereo a velocità \(V\), ogni metro cubo porta con sé un'energia cinetica \(\tfrac12\rho V^2\). Questa quantità, che ha le dimensioni di una pressione, si chiama <b>pressione dinamica</b>:</p>
+$$\bar q=\tfrac12\,\rho\,V^2\qquad[\text{Pa}]$$
+<p>È il numero più importante dell'aerodinamica: tutte le forze e tutti i momenti aerodinamici sono proporzionali a \(\bar q\) (capitolo 3). A 100 nodi (51,4 m/s) al livello del mare \(\bar q\approx1620\) Pa: su ogni metro quadro d'ala "preme" il peso di 165 kg.</p>
+
+<h2>Velocità indicata e velocità vera</h2>
+<p>Il tachimetro dell'aereo non misura la velocità: misura la pressione dinamica, con il <b>tubo di Pitot</b> (pressione totale) e una presa statica. La scala è tarata con la densità al livello del mare, quindi lo strumento mostra la <b>velocità indicata</b> (IAS):</p>
+$$\bar q=\tfrac12\rho V^2=\tfrac12\rho_0\,V_{IAS}^2\quad\Longrightarrow\quad V_{IAS}=V\sqrt{\frac{\rho}{\rho_0}},\qquad V_{TAS}=\frac{V_{IAS}}{\sqrt{\rho/\rho_0}}$$
+<p>È una grande comodità per il pilota: l'aereo stalla, decolla e atterra sempre alla stessa velocità <i>indicata</i>, a qualunque quota, perché le forze dipendono da \(\bar q\). Ma la velocità vera (TAS), quella rispetto all'aria, cresce con la quota: circa il 2% ogni 1000 piedi. Sulla pista di Courchevel (2000 m) il Cessna stacca le ruote alla solita velocità indicata, ma va più veloce di circa il 10% e la corsa di decollo è molto più lunga.</p>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>La densità a ogni passo di calcolo, alla quota dell'aereo (<a data-codice="js/fisica.js#L87-L88">js/fisica.js, righe 87–88</a>), e la velocità indicata mostrata sul PFD (<a data-codice="js/fisica.js#L67-L68">righe 67–68</a>):</p>
+<pre><code>const rho=1.225*Math.pow(Math.max(0.2,1-2.2558e-5*st.pos.y),4.2559);
+const qbar=0.5*rho*V*V;
+...
+st.tas=V; st.ias=Math.sqrt(2*qbar/1.225);</code></pre>
+  <p>Il <code>Math.max(0.2, …)</code> è una protezione: sopra i 35 km la formula darebbe un numero negativo (la troposfera finisce a 11 km), e così il programma non si rompe se qualcuno prova a salire troppo.</p>
+</div>
+
+<h2>Unità di misura dell'aviazione</h2>
+<p>L'aviazione usa ancora unità "storiche". Nel simulatore i calcoli sono tutti in unità SI e si convertono solo per gli strumenti:</p>
+<table>
+  <tr><th>Grandezza</th><th>Unità aeronautica</th><th>In unità SI</th></tr>
+  <tr><td>Velocità</td><td>nodo (kt) = 1 miglio nautico all'ora</td><td class="n">0,5144 m/s</td></tr>
+  <tr><td>Quota</td><td>piede (ft)</td><td class="n">0,3048 m</td></tr>
+  <tr><td>Velocità verticale</td><td>piedi al minuto (ft/min)</td><td class="n">0,00508 m/s</td></tr>
+  <tr><td>Distanza</td><td>miglio nautico (NM) = 1′ di latitudine</td><td class="n">1852 m</td></tr>
+  <tr><td>Pressione (altimetro)</td><td>ettopascal (hPa) o pollici di mercurio</td><td class="n">100 Pa</td></tr>
+</table>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Calcola la densità a 3000 m e la velocità vera di un aereo che a quella quota legge 100 nodi sul tachimetro.</li>
+    <li>Quanto vale la pressione dinamica a 3000 m per lo stesso aereo? Confrontala con quella al suolo a 100 nodi.</li>
+    <li>Perché d'estate, con 35 °C, un aeroporto di pianura "si comporta" come se fosse più in alto? (Suggerimento: \(\rho=p/(RT)\).)</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>\(1-2{,}2558\cdot10^{-5}\cdot3000=0{,}9323\); \(0{,}9323^{4{,}2559}=0{,}742\); \(\rho=0{,}909\ \text{kg/m}^3\). \(V_{TAS}=100/\sqrt{0{,}742}=116\) nodi.</li>
+      <li>È la stessa, circa 1620 Pa: è proprio questo il significato della velocità indicata.</li>
+      <li>A pari pressione, una temperatura più alta dà una densità più bassa: 35 °C invece di 15 °C riducono \(\rho\) del 6,5%, come salire di circa 700 m (la "quota densità"). Il decollo è più lungo e la salita più lenta.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const g=FV.grafico(document.getElementById('cvAtm'),{x:[0,6000],y:[0.4,1.3],etX:'quota (m)',etY:'densità (kg/m³)',rapporto:0.45});
+  const rho=h=>1.225*Math.pow(1-2.2558e-5*h,4.2559);
+  let h=1500,ias=100;
+  function agg(){
+    g.pulisci();g.assi();
+    g.curva(rho,FV.colore('accento'));
+    g.curva(x=>1.225*Math.exp(-x/8400),FV.colore('tenue'),1.2,[5,5]);
+    g.testo(4300,0.62,'esponenziale semplice',FV.colore('tenue'));
+    g.punto(h,rho(h),FV.colore('accento2'),FV.fmt(rho(h),3)+' kg/m³');
+    const T=288.15-0.0065*h,p=101325*Math.pow(1-2.2558e-5*h,5.2559),s=rho(h)/1.225;
+    document.getElementById('r-t').textContent=FV.fmt(T-273.15,1)+' °C';
+    document.getElementById('r-p').textContent=FV.fmt(p/100,0)+' hPa';
+    document.getElementById('r-r').textContent=FV.fmt(rho(h),3)+' kg/m³ ('+FV.fmt(s*100,0)+'%)';
+    document.getElementById('r-tas').textContent=FV.fmt(ias/Math.sqrt(s),0)+' kt';
+  }
+  FV.cursore('h',v=>{h=v;agg();},v=>FV.fmt(v)+' m ('+FV.fmt(Math.round(v*3.28084/100)*100)+' ft)').agg();
+  FV.cursore('ias',v=>{ias=v;agg();},v=>FV.fmt(v)+' kt').agg();
+  window.addEventListener('resize',agg);
+});
+</script>
+</body>
+</html>

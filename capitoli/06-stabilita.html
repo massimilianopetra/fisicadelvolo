@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Momenti e stabilità — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/c172.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Momenti e stabilità</h1>
+<p class="sottotitolo">Un aereo stabile, lasciato a sé stesso, torna da solo all'equilibrio. Merito della forma, e di qualche coefficiente col segno giusto.</p>
+
+<h2>I tre momenti</h2>
+<p>Le forze del capitolo 3 non passano esattamente per il baricentro: producono dei <b>momenti</b> che fanno ruotare l'aereo. Si scrivono come le forze, con una lunghezza di riferimento in più (l'apertura \(b\) per rollio e imbardata, la corda media \(c\) per il beccheggio):</p>
+<div class="box formula">
+  <div class="titolo">Momenti aerodinamici</div>
+  $$\mathcal{L}=\bar q\,S\,b\,C_l\qquad \mathcal{M}=\bar q\,S\,c\,C_m\qquad \mathcal{N}=\bar q\,S\,b\,C_n$$
+  <p>rollio \(\mathcal L\), beccheggio \(\mathcal M\), imbardata \(\mathcal N\) (convenzione dei libri: \(\mathcal M>0\) muso su, \(\mathcal N>0\) muso a destra, \(\mathcal L>0\) ala destra giù).</p>
+</div>
+<p>Ogni coefficiente si sviluppa come una somma di termini lineari, uno per ogni causa: è lo sviluppo in serie di Taylor al primo ordine attorno al volo livellato. I coefficienti che moltiplicano gli angoli e i ratei si chiamano <b>derivate di stabilità</b>; quelli che moltiplicano i comandi, <b>derivate di controllo</b>.</p>
+$$C_m=C_{m0}+C_{m\alpha}\,\alpha+C_{mq}\,\frac{qc}{2V}+C_{m\delta_e}\,\delta_e+C_{m,flap}\,\delta_f$$
+$$C_l=C_{l\beta}\,\beta+C_{lp}\,\frac{pb}{2V}+C_{lr}\,\frac{rb}{2V}+C_{l\delta_a}\,\delta_a+C_{l\delta_r}\,\delta_r$$
+$$C_n=C_{n\beta}\,\beta+C_{np}\,\frac{pb}{2V}+C_{nr}\,\frac{rb}{2V}+C_{n\delta_a}\,\delta_a+C_{n\delta_r}\,\delta_r$$
+
+<h2>Che cosa vuol dire ogni coefficiente</h2>
+<p>Il bello di questo modello è che ogni numero ha un significato fisico, e il <b>segno</b> dice se l'aereo è stabile:</p>
+<table id="tabCoeff">
+  <tr><th>Coefficiente</th><th>Cessna</th><th>Significato</th></tr>
+  <tr><td>\(C_{m\alpha}\)</td><td class="n" data-c="Cmalfa"></td><td><b>Stabilità longitudinale statica</b>. Negativo: se una raffica alza il muso, nasce un momento che lo riabbassa. Dipende dalla posizione del baricentro: più è avanti, più è negativo.</td></tr>
+  <tr><td>\(C_{mq}\)</td><td class="n" data-c="Cmq"></td><td><b>Smorzamento in beccheggio</b>: quando l'aereo ruota, il piano di coda si muove su o giù nell'aria e frena la rotazione.</td></tr>
+  <tr><td>\(C_{m\delta_e}\)</td><td class="n" data-c="Cmde"></td><td><b>Efficacia dell'elevatore</b> (convenzione del simulatore: positivo = cabra).</td></tr>
+  <tr><td>\(C_{l\beta}\)</td><td class="n" data-c="Clbeta"></td><td><b>Effetto diedro</b>: se l'aereo scivola verso destra, l'ala destra riceve più aria e si alza: l'aereo si rimette a livello. Negativo = stabile. Nel Cessna lo dà anche l'ala alta.</td></tr>
+  <tr><td>\(C_{lp}\)</td><td class="n" data-c="Clp"></td><td><b>Smorzamento di rollio</b>: l'ala che scende vede più angolo d'attacco e frena il rollio.</td></tr>
+  <tr><td>\(C_{lr}\)</td><td class="n" data-c="Clr"></td><td>Rollio dovuto all'imbardata: l'ala esterna alla virata va più veloce e porta di più.</td></tr>
+  <tr><td>\(C_{l\delta_a}\)</td><td class="n" data-c="Clda"></td><td><b>Efficacia degli alettoni</b>.</td></tr>
+  <tr><td>\(C_{n\beta}\)</td><td class="n" data-c="Cnbeta"></td><td><b>Stabilità di banderuola</b>: la deriva riallinea il muso al vento relativo, come una banderuola. Positivo = stabile.</td></tr>
+  <tr><td>\(C_{nr}\)</td><td class="n" data-c="Cnr"></td><td><b>Smorzamento d'imbardata</b>.</td></tr>
+  <tr><td>\(C_{n\delta_a}\)</td><td class="n" data-c="Cnda"></td><td><b>Imbardata inversa</b>: l'alettone abbassato fa più resistenza e tira il muso dalla parte sbagliata. Per questo in virata si usa anche la pedaliera.</td></tr>
+  <tr><td>\(C_{n\delta_r}\)</td><td class="n" data-c="Cndr"></td><td><b>Efficacia del timone</b>.</td></tr>
+</table>
+<p>I valori sono quelli pubblicati per il Cessna 172 nei testi di meccanica del volo (per esempio Roskam, <i>Airplane Flight Dynamics</i>), con qualche ritocco "a sensazione" fatto provando il simulatore.</p>
+
+<h2>Stabilità statica e trim</h2>
+<p>Per volare dritto senza sforzo il momento di beccheggio deve essere nullo: \(C_m=0\). L'elevatore necessario (o la posizione del trim) è</p>
+<div class="box formula">
+  <div class="titolo">Elevatore di equilibrio</div>
+  $$\delta_{e,trim}=-\frac{C_{m0}+C_{m\alpha}\,\alpha}{C_{m\delta_e}}$$
+</div>
+<p>Più si vola lenti, più serve \(\alpha\) (per avere \(C_L\)), e più bisogna tirare. È il comportamento che si sente sulla cloche di un aereo stabile: <b>per rallentare si tira, per accelerare si spinge</b>. Se il baricentro fosse troppo indietro, \(C_{m\alpha}\) diventerebbe positivo: l'aereo sarebbe instabile, ogni disturbo crescerebbe e il pilota non riuscirebbe a tenerlo. Per questo il carico va sempre controllato (peso e centraggio).</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — elevatore di equilibrio</div>
+  <canvas id="cvTrim"></canvas>
+  <div class="comandi">
+    <label>C<sub>mα</sub> <input type="range" id="cma" min="-2" max="0.2" step="0.05" value="-0.89"><output for="cma"></output></label>
+  </div>
+  <p style="font-size:.86rem;color:var(--tenue)">Prova ad avvicinare \(C_{m\alpha}\) a zero (baricentro indietro): la curva diventa piatta, l'aereo non "chiede" più di tirare per rallentare. Con \(C_{m\alpha}>0\) la pendenza si rovescia: instabile.</p>
+</div>
+
+<h2>Stabilità dinamica: i modi dell'aereo</h2>
+<p>Un aereo stabile non torna all'equilibrio di colpo: oscilla, con alcuni movimenti tipici chiamati <b>modi</b>. Si trovano linearizzando le equazioni del moto (capitolo 7) e calcolando gli autovalori; ma si possono anche osservare nel simulatore.</p>
+<ul>
+  <li><b>Corto periodo</b> (beccheggio): oscillazione rapida (1–3 s) dell'angolo d'attacco, molto smorzata da \(C_{mq}\). Quasi non si vede.</li>
+  <li><b>Fugoide</b>: lenta (20–40 s) e poco smorzata. L'aereo scambia quota e velocità: scende e accelera, la portanza cresce, risale e rallenta, e così via, quasi senza cambiare l'angolo d'attacco. Lanchester (1908) ne stimò il periodo: \(T\approx\pi\sqrt2\,V/g\).</li>
+  <li><b>Rollio puro</b>: il rollio si ferma subito quando si lasciano gli alettoni (smorzato da \(C_{lp}\)).</li>
+  <li><b>Spirale</b>: lentissima; se è instabile l'aereo, lasciato a sé, entra piano piano in una virata sempre più stretta.</li>
+  <li><b>Dutch roll</b> (rollio olandese): oscillazione combinata di imbardata e rollio, come un pattinatore.</li>
+</ul>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — la fugoide</div>
+  <canvas id="cvFug"></canvas>
+  <div class="comandi">
+    <label>Velocità di equilibrio <input type="range" id="v0" min="60" max="130" step="1" value="100"><output for="v0"></output></label>
+    <label>Disturbo iniziale <input type="range" id="dv" min="-20" max="20" step="1" value="10"><output for="dv"></output></label>
+  </div>
+  <div class="risultati"><span>periodo simulato <b id="r-per"></b></span><span>formula di Lanchester <b id="r-lan"></b></span></div>
+  <p style="font-size:.86rem;color:var(--tenue)">Modello "a punto materiale": l'angolo d'attacco resta fisso (il corto periodo è già smorzato), la spinta uguale alla resistenza di equilibrio. Si integrano velocità \(V\), pendenza \(\gamma\) e quota per 3 minuti.</p>
+</div>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>I momenti in <a data-codice="js/fisica.js#L144-L155">js/fisica.js, righe 144–155</a>, scritti come sopra (con \(cb=b/2V\), \(cc=c/2V\)):</p>
+<pre><code>const Cl=ae.Clbeta*beta+ae.Clp*(1-1.15*stallT)*p*cb+ae.Clr*r*cb+ae.Clda*da+asim;
+const Cm=ae.Cm0+ae.Cmalfa*sa+ae.Cmq*q*cc+ae.Cmflap*fl-0.12*stallT;
+const Cn=ae.Cnbeta*beta+ae.Cnp*p*cb+ae.Cnr*r*cb+ae.Cnda*da;
+const L=qbar*S*b*Cl+qR*S*b*ae.Cldr*dr;      // timone nel soffio dell'elica
+const Mm=qbar*S*c*Cm+qE*S*c*ae.Cmde*de;     // elevatore nel soffio dell'elica
+const N=qbar*S*b*Cn+qR*S*b*ae.Cndr*dr;
+Tb.set(Mm,-N,-L);                           // dalla convenzione dei libri agli assi three.js</code></pre>
+  <p>Due dettagli da notare: in stallo lo smorzamento di rollio \(C_{lp}\) cambia segno (fattore \(1-1{,}15\,s\)) e compare un piccolo momento asimmetrico <code>asim</code>: è così che il modello riproduce l'<b>ala che cade</b> in stallo, l'inizio della vite. E il muso scende da solo (\(-0{,}12\,s\) in \(C_m\)).</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Calcola l'elevatore di equilibrio a 70 nodi al livello del mare (serve \(\alpha\): ricavalo dal \(C_L\) necessario, capitolo 3).</li>
+    <li>Con la formula di Lanchester, quanto dura una oscillazione fugoide a 100 nodi?</li>
+    <li>Nel simulatore: trimma l'aereo in volo livellato, poi dai un colpo di cloche in avanti e lascia. Misura con il cronometro il periodo della fugoide e confrontalo.</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>70 nodi = 36,0 m/s, \(\bar q=794\) Pa, \(C_L=9810/(794\cdot16{,}2)=0{,}763\); \(\alpha=(0{,}763-0{,}35)/4{,}9=0{,}084\) rad (4,8°). \(\delta_e=-(0{,}04-0{,}89\cdot0{,}084)/1{,}28=+0{,}027\) rad: circa 1,6° a cabrare.</li>
+      <li>\(T=\pi\sqrt2\cdot51{,}4/9{,}81=23\) s.</li>
+      <li>Il periodo misurato è vicino ai 20–25 s; lo smorzamento dipende dalla resistenza.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const A=window.AEREO,ae=A.aero,S=A.ala.superficie,W=A.massa*9.81,KT=FV.KT,b=A.ala.apertura;
+  for(const td of document.querySelectorAll('#tabCoeff td[data-c]'))td.textContent=FV.fmt(ae[td.dataset.c],3);
+  // trim
+  const gT=FV.grafico(document.getElementById('cvTrim'),{x:[50,140],y:[-6,10],etX:'velocità (kt)',etY:'elevatore (°, + = tirare)',rapporto:0.42});
+  let cma=ae.Cmalfa;
+  function trim(){
+    gT.pulisci();gT.assi();
+    const f=c=>kt=>{const V=kt/KT,CL=W/(0.5*1.225*V*V*S),al=(CL-ae.CL0)/ae.CLalfa;return -(ae.Cm0+c*Math.sin(al))/ae.Cmde*FV.R2D;};
+    gT.curva(f(ae.Cmalfa),FV.colore('tenue'),1.2,[5,4]);
+    gT.curva(f(cma),FV.colore('accento'));
+  }
+  FV.cursore('cma',v=>{cma=v;trim();},v=>FV.fmt(v,2)).agg();
+  // fugoide
+  const gF=FV.grafico(document.getElementById('cvFug'),{x:[0,180],y:[-150,150],etX:'tempo (s)',etY:'Δ quota (m)  ·  Δ velocità (kt × 5)',rapporto:0.42});
+  const k=1/(Math.PI*ae.e*b*b/S);let v0=100,dv=10;
+  function fugoide(){
+    const Ve=v0/KT,CL=W/(0.5*1.225*Ve*Ve*S),CD=ae.CD0+k*CL*CL,T=0.5*1.225*Ve*Ve*S*CD,m=A.massa;
+    let V=Ve+dv/KT,g=0,h=0;const dt=0.02,ts=[],hs=[],vs=[];let incroci=[],prec=0;
+    for(let t=0;t<=180;t+=dt){
+      const q=0.5*1.225*V*V;
+      const dV=(T-q*S*CD)/m-9.81*Math.sin(g), dg=(q*S*CL-m*9.81*Math.cos(g))/(m*V);
+      V+=dV*dt;g+=dg*dt;h+=V*Math.sin(g)*dt;
+      if(Math.round(t/dt)%10===0){ts.push(t);hs.push(h);vs.push((V-Ve)*KT*5);}
+      const s=V-Ve;if(prec<0&&s>=0)incroci.push(t);prec=s;
+    }
+    gF.pulisci();gF.assi();gF.serie(ts,vs,FV.colore('verde'),1.6);gF.serie(ts,hs,FV.colore('accento'),2.2);
+    gF.testo(120,135,'quota',FV.colore('accento'));gF.testo(150,135,'velocità',FV.colore('verde'));
+    const per=incroci.length>1?(incroci[incroci.length-1]-incroci[0])/(incroci.length-1):NaN;
+    document.getElementById('r-per').textContent=FV.fmt(per,1)+' s';
+    document.getElementById('r-lan').textContent=FV.fmt(Math.PI*Math.SQRT2*Ve/9.81,1)+' s';
+  }
+  FV.cursore('v0',v=>{v0=v;fugoide();},v=>v+' kt').agg();
+  FV.cursore('dv',v=>{dv=v;fugoide();},v=>(v>0?'+':'')+v+' kt').agg();
+  window.addEventListener('resize',()=>{trim();fugoide();});
+});
+</script>
+</body>
+</html>

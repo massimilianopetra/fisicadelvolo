@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autopilota e controllo PID — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Autopilota e controllo PID</h1>
+<p class="sottotitolo">Misura, confronta con quello che vuoi, correggi. Ripeti 240 volte al secondo: è tutta qui l'idea dei controlli automatici.</p>
+
+<h2>La retroazione</h2>
+<p>Un autopilota è un <b>sistema in retroazione</b> (feedback): misura una grandezza (la prua, la quota), la confronta con il valore voluto e muove un comando (alettoni, elevatore) in proporzione all'<b>errore</b>. Il pilota fa la stessa cosa a occhio; il controllore lo fa con una formula.</p>
+<figure>
+<svg viewBox="0 0 640 150" width="640" role="img" aria-label="Schema a blocchi di un anello di controllo">
+  <defs><marker id="fr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+  <g font-family="B612" font-size="13" fill="currentColor" style="color:var(--testo)" text-anchor="middle">
+    <g stroke="currentColor" fill="none" stroke-width="1.6">
+      <circle cx="120" cy="60" r="14"/>
+      <rect x="190" y="38" width="120" height="44" rx="6"/>
+      <rect x="380" y="38" width="120" height="44" rx="6"/>
+      <line x1="30" y1="60" x2="104" y2="60" marker-end="url(#fr)"/>
+      <line x1="134" y1="60" x2="188" y2="60" marker-end="url(#fr)"/>
+      <line x1="310" y1="60" x2="378" y2="60" marker-end="url(#fr)"/>
+      <line x1="500" y1="60" x2="610" y2="60" marker-end="url(#fr)"/>
+      <polyline points="560,60 560,120 120,120 120,76" marker-end="url(#fr)"/>
+    </g>
+    <text x="120" y="65">Σ</text><text x="98" y="88" font-size="16">−</text>
+    <text x="250" y="57">controllore</text><text x="250" y="74">PID</text>
+    <text x="440" y="57">aereo</text><text x="440" y="74">(fisica)</text>
+    <text x="62" y="50">voluto</text><text x="160" y="50">errore</text><text x="344" y="50">comando</text><text x="590" y="50">misura</text>
+    <text x="340" y="138" style="fill:var(--tenue)">retroazione: si misura e si confronta</text>
+  </g>
+</svg>
+<figcaption>L'anello di controllo: l'errore fra valore voluto e valore misurato decide il comando.</figcaption>
+</figure>
+
+<h2>Il controllore PID</h2>
+<div class="box formula">
+  <div class="titolo">Proporzionale – Integrale – Derivativo</div>
+  $$u(t)=K_P\,e(t)+K_I\int_0^t e(\tau)\,d\tau+K_D\,\frac{de}{dt}$$
+  <ul>
+    <li><b>P</b>: comando proporzionale all'errore. Da solo spesso lascia un piccolo errore residuo, e se \(K_P\) è troppo alto oscilla.</li>
+    <li><b>I</b>: accumula l'errore nel tempo e lo azzera del tutto (per esempio compensa un trim sbagliato). Ma rende più lento e oscillante il sistema, e va limitato (anti-windup).</li>
+    <li><b>D</b>: reagisce alla velocità con cui cambia l'errore, come un freno: smorza le oscillazioni. Di solito si usa la derivata della <i>misura</i> (il rateo di rotazione dato dai giroscopi), che è meno rumorosa.</li>
+  </ul>
+</div>
+<p>Nel calcolatore il tempo è a passi: l'integrale diventa una somma \(I\mathrel{+}=e\,\Delta t\), la derivata una differenza o, meglio, una misura diretta del rateo.</p>
+
+<h2>Anelli uno dentro l'altro</h2>
+<p>Un autopilota non comanda direttamente la prua con gli alettoni: usa <b>anelli in cascata</b>, ognuno più veloce di quello che lo contiene.</p>
+<table>
+  <tr><th>Modo</th><th>Anello esterno (lento)</th><th>Anello interno (veloce)</th></tr>
+  <tr><td>HDG (prua)</td><td>errore di prua → inclinazione voluta: \(\varphi_c=1{,}2\cdot e_\psi\), al massimo 20°</td><td>errore di inclinazione → alettoni (P + D con il rateo di rollio + I)</td></tr>
+  <tr><td>VS (velocità verticale)</td><td>errore di VS → <i>velocità</i> di variazione dell'assetto voluto: 0,004 °/s per ft/min</td><td>errore di assetto → elevatore (P + D con il rateo di beccheggio + I)</td></tr>
+  <tr><td>ALT (quota)</td><td>errore di quota → VS voluta: 4 ft/min per ft, al massimo ±500 ft/min</td><td>come VS</td></tr>
+</table>
+<p>Il motivo è fisico: la prua cambia perché l'aereo è inclinato (capitolo 4, \(\dot\psi=g\tan\varphi/V\)), e l'inclinazione cambia perché ci sono gli alettoni. Controllando prima l'inclinazione, l'anello esterno "vede" un sistema semplice e prevedibile.</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — tarare un anello di prua</div>
+  <canvas id="cvPid"></canvas>
+  <div class="comandi">
+    <label>K<sub>P</sub> <input type="range" id="kp" min="0.1" max="5" step="0.1" value="1.2"><output for="kp"></output></label>
+    <label>K<sub>I</sub> <input type="range" id="ki" min="0" max="0.3" step="0.01" value="0"><output for="ki"></output></label>
+    <label>K<sub>D</sub> <input type="range" id="kd" min="0" max="6" step="0.1" value="0"><output for="kd"></output></label>
+    <label><input type="checkbox" id="lim" checked> limite di 20° di inclinazione</label>
+    <label><input type="checkbox" id="ven"> ala "pesante" (disturbo costante di rollio)</label>
+  </div>
+  <div class="risultati"><span>sovraelongazione <b id="r-ov"></b></span><span>tempo per arrivare entro 2° <b id="r-ts"></b></span><span>errore finale <b id="r-ef"></b></span></div>
+  <p style="font-size:.86rem;color:var(--tenue)">Virata di 90° a 100 nodi. L'inclinazione segue il comando con un ritardo (costante di tempo 1,5 s: l'anello interno); la prua cambia con \(g\tan\varphi/V\). Con l'ala "pesante" (per esempio la coppia dell'elica, o il carburante tutto in un serbatoio) l'aereo tende a inclinarsi da un lato di 3°: con il solo P resta un errore di prua, solo il termine integrale lo elimina. Valori del simulatore: \(K_P=1{,}2\), niente I e D sulla prua (li hanno gli anelli interni).</p>
+</div>
+
+<h2>Le protezioni</h2>
+<p>Un autopilota vero deve anche <b>non fare danni</b>. Quello del simulatore, come il GFC 700 del Cessna, non comanda la manetta: se il pilota chiede di salire a 1500 ft/min con il motore al minimo, l'aereo rallenterebbe fino allo stallo. Per questo c'è una <b>protezione di velocità</b>: si calcolano due ratei di assetto, quello che servirebbe per la VS e quello che serve per non scendere sotto 65 nodi, e si prende il più prudente:</p>
+$$\dot\theta_c=\min\Big(\underbrace{0{,}004\,(VS_c-VS)}_{\text{per la VS}},\;\underbrace{0{,}15\,(V_{IAS}-65)}_{\text{per la velocità}}\Big)$$
+<p>Allo stesso modo con un \(\max\) per non superare la velocità massima di crociera. È un esempio di <b>controllo con selezione</b> (min/max), molto usato negli impianti industriali.</p>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>Anello laterale (<a data-codice="js/autopilota.js#L166-L183">js/autopilota.js, righe 166–183</a>) e verticale (<a data-codice="js/autopilota.js#L200-L218">righe 200–218</a>):</p>
+<pre><code>bankCmd=clamp(errH*1.2,-20,20);                          // P sulla prua, con limite
+iAil=clamp(iAil+(bankCmd-m.bank)*0.003*dt,-0.12,0.12);   // I con anti-windup
+const ail=clamp(0.035*(bankCmd-m.bank)-0.012*m.p+iAil,-0.35,0.35);   // P, D (rateo p), I
+...
+const rVs=clamp((vsCmd-m.vs)*0.004,-2,2);
+const rLento=clamp((m.ias-vMin)*0.15,-2,2), rVeloce=clamp((m.ias-vMax)*0.15,-2,2);
+let r=rVs; if(rLento&lt;r) r=rLento; if(rVeloce>r) r=rVeloce;  // protezioni di velocità
+tetaCmd=clamp(tetaCmd+r*dt,-10,13);
+const errT=tetaCmd-m.pitch;
+iPitch=clamp(iPitch+errT*0.02*dt,-0.4,0.4);
+let elev=clamp(0.05*errT-0.025*m.q+iPitch,-0.5,0.5);</code></pre>
+  <p>Ogni <code>clamp</code> è una saturazione: i comandi hanno una corsa finita, e anche gli integrali sono limitati per non "caricarsi" all'infinito (windup) quando il comando è già a fondo corsa. In più il <b>trim automatico</b> sposta lentamente il trim al posto dell'integrale dell'elevatore, come fa il servo del trim sull'aereo vero.</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Nel laboratorio, aumenta \(K_P\) fino a 4 senza limite di inclinazione: che cosa succede? Ora riattiva il limite: perché la risposta cambia tanto?</li>
+    <li>Attiva l'ala pesante: trova un valore di \(K_I\) che porti l'errore finale a zero senza troppe oscillazioni.</li>
+    <li>In modo ALT l'aereo è 200 ft sotto la quota voluta. Quale VS chiede l'autopilota? E se è 50 ft sotto?</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>Senza limite chiede inclinazioni enormi (fino al massimo del laboratorio, 80°), vira bruscamente e oscilla attorno alla prua. Con il limite l'inizio della virata è a inclinazione costante (saturazione) e solo vicino alla prua voluta entra in gioco il P: la risposta diventa più dolce e quasi indipendente da \(K_P\).</li>
+      <li>Valori fra 0,02 e 0,05 vanno bene; troppo alti fanno oscillare lentamente.</li>
+      <li>\(4\cdot200=800\), limitato a 500 ft/min. A 50 ft: 200 ft/min. Avvicinandosi alla quota la salita rallenta da sola: l'aereo "atterra" dolcemente sulla quota.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const g=FV.grafico(document.getElementById('cvPid'),{x:[0,60],y:[-30,120],etX:'tempo (s)',etY:'prua (°)  ·  inclinazione (°)',rapporto:0.45});
+  let kp=1.2,ki=0,kd=0,lim=true,ven=false;
+  function sim(){
+    const V=100/FV.KT,tau=1.5,dt=0.02;let psi=0,phi=0,I=0,ts=[],ps=[],fs=[],max=0,ts2=NaN;
+    const dist=ven?-3:0;   // ala pesante: l'inclinazione si assesta 3° più a sinistra del comando
+    for(let t=0;t<=60;t+=dt){
+      const e=90-psi;
+      I+=e*dt;
+      const rate=9.81*Math.tan(phi*FV.D2R)/V*FV.R2D;
+      let phic=kp*e+ki*I-kd*rate;if(lim)phic=Math.max(-20,Math.min(20,phic));
+      phic=Math.max(-80,Math.min(80,phic));
+      phi+=(phic+dist-phi)/tau*dt;psi+=rate*dt;
+      const trk=psi;max=Math.max(max,trk);
+      if(Math.abs(90-trk)>2)ts2=NaN;else if(!Number.isFinite(ts2))ts2=t;
+      if(Math.round(t/dt)%5===0){ts.push(t);ps.push(trk);fs.push(phi);}
+    }
+    g.pulisci();g.assi();
+    g.linea(0,90,60,90,FV.colore('verde'),1.2,[6,4]);
+    g.serie(ts,fs,FV.colore('accento2'),1.6);g.serie(ts,ps,FV.colore('accento'),2.4);
+    g.testo(1,112,'prua',FV.colore('accento'));g.testo(12,112,'inclinazione',FV.colore('accento2'));g.testo(26,112,'voluta',FV.colore('verde'));
+    document.getElementById('r-ov').textContent=FV.fmt(Math.max(0,max-90),1)+'°';
+    document.getElementById('r-ts').textContent=Number.isFinite(ts2)?FV.fmt(ts2,1)+' s':'oltre 60 s';
+    document.getElementById('r-ef').textContent=FV.fmt(90-ps[ps.length-1],1)+'°';
+  }
+  FV.cursore('kp',v=>{kp=v;sim();},v=>FV.fmt(v,1)).agg();
+  FV.cursore('ki',v=>{ki=v;sim();},v=>FV.fmt(v,2)).agg();
+  FV.cursore('kd',v=>{kd=v;sim();},v=>FV.fmt(v,1)).agg();
+  document.getElementById('lim').addEventListener('change',e=>{lim=e.target.checked;sim();});
+  document.getElementById('ven').addEventListener('change',e=>{ven=e.target.checked;sim();});
+  window.addEventListener('resize',sim);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radionavigazione: VOR e ILS — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Radionavigazione: VOR e ILS</h1>
+<p class="sottotitolo">Prima del GPS, e ancora oggi, gli aerei trovano la strada con le onde radio. Dietro ci sono angoli, arcotangenti e un po' di geometria della Terra.</p>
+
+<h2>Il VOR: una stazione, 360 radiali</h2>
+<p>Il <b>VOR</b> (VHF Omnidirectional Range) è un trasmettitore a terra che manda due segnali a 30 Hz: uno uguale in tutte le direzioni, l'altro la cui fase dipende dalla direzione in cui viene irradiato. Il ricevitore di bordo misura la <b>differenza di fase</b> e ricava da quale direzione lo vede la stazione: il <b>radiale</b>, cioè la rotta magnetica dalla stazione verso l'aereo.</p>
+<p>Il simulatore non simula le onde: calcola direttamente la geometria. Con \(\Delta x\) (verso est) e \(\Delta z\) (verso sud) dall'aereo alla stazione:</p>
+<div class="box formula">
+  <div class="titolo">Radiale e deviazione</div>
+  $$\text{radiale}=\operatorname{atan2}(\Delta x,\;-\Delta z)\pmod{360^\circ}$$
+  <p>Il pilota sceglie una rotta (OBS); lo strumento mostra la differenza \(d=\text{radiale}-\text{OBS}\) (riportata fra −180° e 180°). Se \(|d|\le90^\circ\) l'aereo è dalla parte "FROM" (si allontana), altrimenti "TO". L'ago si sposta di \(-d/10^\circ\): fondo scala a 10° di errore.</p>
+</div>
+<p>L'indicazione è <b>angolare</b>: a 1 NM dalla stazione 10° di errore sono 320 m, a 50 NM sono 16 km. Più ci si avvicina alla stazione, più l'ago diventa sensibile, fino a "impazzire" quando la si sorvola.</p>
+
+<h3>Il DME e l'orizzonte radio</h3>
+<p>Il <b>DME</b> misura la distanza con il tempo di andata e ritorno di un impulso radio. È la distanza <i>obliqua</i>: sopra la stazione a 6000 ft il DME indica circa 1 NM anche se in pianta si è a zero.</p>
+$$d_{DME}=\sqrt{d_{oriz}^2+\Delta h^2}$$
+<p>Le onde VHF viaggiano in linea retta e la Terra è curva: oltre l'orizzonte non si riceve. Per due antenne alte \(h_1\) e \(h_2\) (in piedi) la portanza è</p>
+<div class="box formula">
+  <div class="titolo">Orizzonte radio</div>
+  $$d\approx1{,}23\left(\sqrt{h_1}+\sqrt{h_2}\right)\ \text{NM}$$
+  <p>Deriva da \(d=\sqrt{2Rh}\) (tangente alla sfera di raggio \(R\)), con un raggio terrestre "aumentato" di 4/3 perché l'atmosfera curva un po' le onde verso il basso. A 1000 ft si riceve un VOR a circa 45 NM, a 10 000 ft a 130 NM.</p>
+</div>
+
+<h2>L'ILS: atterrare con la nebbia</h2>
+<p>L'<b>ILS</b> (Instrument Landing System) guida l'aereo fino a poche decine di metri dalla pista. È fatto di due trasmettitori:</p>
+<ul>
+  <li>il <b>localizzatore</b> (LOC), oltre la fine della pista, che indica se si è a destra o a sinistra dell'asse;</li>
+  <li>il <b>sentiero di discesa</b> (glide slope, GS), di fianco alla pista a circa 300 m dalla soglia, che indica se si è sopra o sotto una retta inclinata di 3°.</li>
+</ul>
+<div class="box formula">
+  <div class="titolo">Le due deviazioni nel simulatore</div>
+  $$\text{LOC}=\operatorname{clamp}\left(-\frac{\operatorname{atan2}(y_{lat},\,x_{av})}{2{,}5^\circ},\;-1,\;1\right)\qquad \text{GS}=\operatorname{clamp}\left(\frac{3^\circ-\operatorname{atan2}(h,\,d_{GS})}{0{,}7^\circ},\;-1,\;1\right)$$
+  <p>\(x_{av}\) e \(y_{lat}\): distanza davanti all'antenna del localizzatore e scostamento laterale; \(h\) altezza sopra la pista, \(d_{GS}\) distanza orizzontale dall'antenna del sentiero. Fondo scala: 2,5° per il LOC, 0,7° per il GS (come gli strumenti veri, a quattro "pallini"). Il LOC si riceve entro ±35° dall'asse, il GS entro 10 NM e ±8°.</p>
+</div>
+<p>Due regole pratiche che vengono dalla geometria: il sentiero di 3° scende di \(1852\cdot\tan3^\circ=97\) m (318 ft) per ogni miglio nautico, e la velocità verticale per restarci è \(V_z=V_{suolo}\tan3^\circ\), cioè in ft/min circa <b>5 volte la velocità al suolo in nodi</b> (\(101{,}3\cdot\tan3^\circ=5{,}3\)).</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — dove sono sul sentiero?</div>
+  <canvas id="cvIls"></canvas>
+  <div class="comandi">
+    <label>Distanza dalla soglia <input type="range" id="dd" min="0.3" max="10" step="0.1" value="5"><output for="dd"></output></label>
+    <label>Scostamento laterale <input type="range" id="yy" min="-1500" max="1500" step="10" value="200"><output for="yy"></output></label>
+    <label>Altezza sulla pista <input type="range" id="hh" min="0" max="4000" step="10" value="1500"><output for="hh"></output></label>
+  </div>
+  <div class="risultati"><span>deviazione LOC <b id="r-loc"></b></span><span>deviazione GS <b id="r-gs"></b></span><span>quota del sentiero qui <b id="r-hs"></b></span></div>
+</div>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>Tutta la "radio" è geometria (<a data-codice="js/radio.js#L58-L92">js/radio.js, righe 58–92</a>):</p>
+<pre><code>function portata(s,pos){
+  const h=Math.max(0,(pos.y-s.quota)*FT);
+  return Math.min(s.portata,1.23*(Math.sqrt(h)+Math.sqrt(30)));
+}
+...
+const radiale=norm(Math.atan2(dx,-dz)*R2D);
+const d=diff(radiale-obs);
+if(Math.abs(d)<=90){out.daA='FROM';out.dev=clamp(-d/10,-1,1);}
+else{out.daA='TO';out.dev=clamp(diff(radiale-obs-180)/10,-1,1);}
+...
+const ang=Math.atan2(lato,avanti)*R2D;            // localizzatore
+out.dev=clamp(-ang/2.5,-1,1);
+const el=Math.atan2(pos.y-s.quota,dg)*R2D;        // sentiero
+out.gs=clamp((3-el)/0.7,-1,1);</code></pre>
+  <p>Gli ILS sono creati dal programma solo sulle piste dove il sentiero di 3° è libero dal terreno per 10 NM: una funzione controlla che le montagne restino sotto il sentiero (con un margine di 250 ft). Così a Genova, schiacciata fra mare e montagne, non tutte le piste hanno l'ILS.</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Un aereo è 30 NM a nord di un VOR. Su che radiale si trova? Se il pilota ha impostato OBS 010, dove va l'ago, e di quanto?</li>
+    <li>A 4 NM dalla soglia, a che altezza si dovrebbe essere sul sentiero di 3°? E se l'altimetro dice 300 ft in meno?</li>
+    <li>Il Cessna in finale a 70 nodi con 10 nodi di vento contro: quale velocità verticale serve per restare sul sentiero?</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>Radiale 360 (000). \(d=360-10=-10^\circ\): l'ago va a fondo scala (\(-d/10=+1\), a destra): la rotta 010 è a destra, bisogna virare verso destra per intercettarla.</li>
+      <li>\(4\cdot318\approx1270\) ft (più l'altezza dell'antenna rispetto alla soglia, che il modello ignora). 300 ft sotto a 4 NM sono \(\arctan(970/(4\cdot6076))=2{,}29^\circ\): deviazione \((3-2{,}29)/0{,}7\approx1\), il rombo del GS è a fondo scala in alto: "sali!"</li>
+      <li>Velocità al suolo 60 nodi: \(60\cdot5{,}3\approx320\) ft/min.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const cv=document.getElementById('cvIls'),ctx=cv.getContext('2d'),NM=1852,FT=3.28084,Lp=3300;
+  let dd=5,yy=200,hh=1500;
+  function agg(){
+    const x=dd*NM,h=hh/FT;                                   // davanti alla soglia (m), altezza (m)
+    const avanti=x+Lp+300,ang=Math.atan2(yy,avanti)*FV.R2D;   // antenna LOC oltre la fine della pista
+    const loc=Math.max(-1,Math.min(1,-ang/2.5));
+    const dg=x+300,el=Math.atan2(h,dg)*FV.R2D,gs=Math.max(-1,Math.min(1,(3-el)/0.7));
+    const hs=dg*Math.tan(3*FV.D2R)*FT;
+    document.getElementById('r-loc').textContent=Math.abs(ang)>35?'fuori portata':FV.fmt(ang,2)+'° → '+FV.fmt(loc,2);
+    document.getElementById('r-gs').textContent=FV.fmt(el,2)+'° → '+FV.fmt(gs,2);
+    document.getElementById('r-hs').textContent=FV.fmt(hs)+' ft';
+    const r=window.devicePixelRatio||1,W=cv.clientWidth,H=Math.round(W*0.5);
+    cv.style.height=H+'px';cv.width=W*r;cv.height=H*r;ctx.setTransform(r,0,0,r,0,0);ctx.clearRect(0,0,W,H);
+    const tc=FV.colore('testo'),ac=FV.colore('accento'),rc=FV.colore('accento2'),lc=FV.colore('linea'),tn=FV.colore('tenue');
+    ctx.font='12px B612';
+    // pianta (in alto): pista a destra, aereo a sinistra
+    const pw=W*0.66,top=H*0.06,ph=H*0.4,sx=pw/(11*NM),py=top+ph/2,ox=pw*0.9;   // ox = soglia
+    ctx.fillStyle=tn;ctx.fillText('pianta',8,top+12);
+    ctx.save();ctx.beginPath();ctx.rect(0,top,pw+Lp*sx+20,ph);ctx.clip();   // la pianta resta nella sua fascia
+    ctx.fillStyle=lc;ctx.beginPath();ctx.moveTo(ox+(Lp+300)*sx,py);ctx.lineTo(ox-11*NM*sx,py-Math.tan(2.5*FV.D2R)*(11*NM+Lp)*sx*6);ctx.lineTo(ox-11*NM*sx,py+Math.tan(2.5*FV.D2R)*(11*NM+Lp)*sx*6);ctx.closePath();ctx.globalAlpha=0.35;ctx.fill();ctx.globalAlpha=1;
+    ctx.fillStyle=tc;ctx.fillRect(ox,py-3,Lp*sx,6);
+    const ys=6;   // scala laterale esagerata ×6 per vedere qualcosa
+    ctx.fillStyle=rc;ctx.beginPath();ctx.arc(ox-x*sx,py+yy*sx*ys,5,0,7);ctx.fill();
+    ctx.restore();
+    ctx.fillStyle=tn;ctx.fillText('(scala laterale ×6)',8,top+ph+4);
+    ctx.strokeStyle=lc;ctx.beginPath();ctx.moveTo(0,top+ph+10);ctx.lineTo(pw+Lp*sx+20,top+ph+10);ctx.stroke();
+    // profilo (in basso)
+    const pt=top+ph+24,phh=H-pt-14,sz=phh/(4200/FT),base=pt+phh;
+    ctx.fillStyle=tn;ctx.fillText('profilo',8,pt+12);
+    ctx.strokeStyle=lc;ctx.beginPath();ctx.moveTo(ox-11*NM*sx,base);ctx.lineTo(ox+Lp*sx,base);ctx.stroke();
+    ctx.fillStyle=tc;ctx.fillRect(ox,base-3,Lp*sx,3);
+    ctx.strokeStyle=ac;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(ox+300*sx,base);ctx.lineTo(ox-11*NM*sx,base-(11*NM+300)*Math.tan(3*FV.D2R)*sz);ctx.stroke();ctx.lineWidth=1;
+    ctx.fillStyle=rc;ctx.beginPath();ctx.arc(ox-x*sx,base-h*sz,5,0,7);ctx.fill();
+    // strumento: CDI e GS come sul PFD (a destra)
+    const cx=W*0.84,cy=H*0.5,R=Math.min(W*0.13,H*0.4);
+    ctx.strokeStyle=tn;ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,R,0,7);ctx.stroke();
+    for(let i=-2;i<=2;i++){if(!i)continue;ctx.beginPath();ctx.arc(cx+i*R*0.35,cy,3.5,0,7);ctx.stroke();ctx.beginPath();ctx.arc(cx+R*1.15,cy+i*R*0.35,3,0,7);ctx.stroke();}
+    ctx.strokeStyle=FV.colore('verde');ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(cx+loc*R*0.7,cy-R*0.75);ctx.lineTo(cx+loc*R*0.7,cy+R*0.75);ctx.stroke();
+    ctx.fillStyle=FV.colore('verde');const gy=cy-gs*R*0.7;ctx.beginPath();ctx.moveTo(cx+R*1.15,gy-7);ctx.lineTo(cx+R*1.15+6,gy);ctx.lineTo(cx+R*1.15,gy+7);ctx.lineTo(cx+R*1.15-6,gy);ctx.closePath();ctx.fill();
+    ctx.fillStyle=tc;ctx.textAlign='center';ctx.fillText('LOC',cx,cy+R+16);ctx.fillText('GS',cx+R*1.15,cy-R-6);ctx.textAlign='left';
+    ctx.lineWidth=1;
+  }
+  FV.cursore('dd',v=>{dd=v;agg();},v=>FV.fmt(v,1)+' NM').agg();
+  FV.cursore('yy',v=>{yy=v;agg();},v=>(v>0?'+':'')+FV.fmt(v)+' m').agg();
+  FV.cursore('hh',v=>{hh=v;agg();},v=>FV.fmt(v)+' ft').agg();
+  window.addEventListener('resize',agg);
+});
+</script>
+</body>
+</html>

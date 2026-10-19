@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Il corpo rigido a 6 gradi di libertà — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/c172.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Il corpo rigido a 6 gradi di libertà</h1>
+<p class="sottotitolo">Tre coordinate per dire dov'è, tre angoli per dire come è girato: sei numeri, e due leggi della meccanica per farli evolvere.</p>
+
+<h2>Sei gradi di libertà</h2>
+<p>Il simulatore tratta l'aereo come un <b>corpo rigido</b>: un oggetto che non si deforma. Il suo stato in ogni istante è dato da:</p>
+<ul>
+  <li><b>posizione</b> del baricentro \(\vec x\) e <b>velocità</b> \(\vec v\) (assi terra);</li>
+  <li><b>orientamento</b> \(\mathbf q\) (un quaternione) e <b>velocità angolare</b> \(\vec\omega\) (assi corpo).</li>
+</ul>
+<p>Le forze cambiano la velocità, i momenti cambiano la velocità angolare. Tutto il resto (angolo d'attacco, velocità indicata, strumenti) si ricava da questi quattro vettori.</p>
+
+<h2>Il moto del baricentro: Newton</h2>
+<p>La seconda legge della dinamica, scritta negli assi terra (che si possono considerare inerziali: la rotazione della Terra è trascurabile per un aereo leggero):</p>
+<div class="box formula">
+  <div class="titolo">Equazioni della traslazione</div>
+  $$m\,\frac{d\vec v}{dt}=R(\mathbf q)\left(\vec F_{aero}+\vec T\right)+m\vec g+\vec F_{carrello},\qquad \frac{d\vec x}{dt}=\vec v$$
+  <p>Le forze aerodinamiche e la spinta sono calcolate negli assi corpo e ruotate negli assi terra con \(R(\mathbf q)\); peso e carrello sono già negli assi terra.</p>
+</div>
+
+<h2>La rotazione: le equazioni di Eulero</h2>
+<p>Per le rotazioni la legge corrispondente è \(d\vec H/dt=\vec M\), dove \(\vec H=I\vec\omega\) è il <b>momento angolare</b> e \(I\) il <b>tensore d'inerzia</b>. Conviene scriverla negli assi corpo, dove \(I\) è costante; ma gli assi corpo ruotano, e la derivata di un vettore in un sistema rotante ha un termine in più (lo stesso che produce la forza di Coriolis):</p>
+$$\left.\frac{d\vec H}{dt}\right|_{terra}=\left.\frac{d\vec H}{dt}\right|_{corpo}+\vec\omega\times\vec H$$
+<div class="box formula">
+  <div class="titolo">Equazioni di Eulero</div>
+  $$I\,\frac{d\vec\omega}{dt}+\vec\omega\times\left(I\,\vec\omega\right)=\vec M$$
+  <p>Se gli assi corpo sono assi principali d'inerzia, \(I=\operatorname{diag}(I_1,I_2,I_3)\) e per componenti:</p>
+  $$I_1\dot\omega_1=M_1-(I_3-I_2)\,\omega_2\,\omega_3\qquad I_2\dot\omega_2=M_2-(I_1-I_3)\,\omega_3\,\omega_1\qquad I_3\dot\omega_3=M_3-(I_2-I_1)\,\omega_1\,\omega_2$$
+</div>
+<p>Il termine \(\vec\omega\times I\vec\omega\) è <b>giroscopico</b>: accoppia le rotazioni attorno ad assi diversi. È lui che fa precedere una trottola, e che rende instabile la rotazione attorno all'asse di inerzia intermedio (laboratorio qui sotto).</p>
+
+<h3>I momenti d'inerzia del Cessna</h3>
+<table>
+  <tr><th>Asse (three.js)</th><th>Rotazione</th><th>Momento d'inerzia</th><th>Raggio giratore \(\sqrt{I/m}\)</th></tr>
+  <tr><td>x (ala)</td><td>beccheggio</td><td class="n" id="i-x"></td><td class="n" id="k-x"></td></tr>
+  <tr><td>y (verticale)</td><td>imbardata</td><td class="n" id="i-y"></td><td class="n" id="k-y"></td></tr>
+  <tr><td>z (fusoliera)</td><td>rollio</td><td class="n" id="i-z"></td><td class="n" id="k-z"></td></tr>
+</table>
+<p>L'imbardata ha l'inerzia più grande (ruotano sia le ali sia la fusoliera), il rollio la più piccola (la massa è vicina all'asse della fusoliera, a parte le ali). Il <b>raggio giratore</b> è la distanza a cui bisognerebbe concentrare tutta la massa per avere la stessa inerzia. Il modello trascura il prodotto d'inerzia \(I_{xz}\), che nell'aereo vero è piccolo ma non nullo.</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — l'effetto racchetta da tennis (teorema dell'asse intermedio)</div>
+  <canvas id="cvEul"></canvas>
+  <div class="comandi">
+    <label>Asse di rotazione iniziale
+      <select id="asse"><option value="0">minimo (rollio)</option><option value="1" selected>intermedio (beccheggio)</option><option value="2">massimo (imbardata)</option></select></label>
+    <label>Disturbo <input type="range" id="dist" min="0.001" max="0.1" step="0.001" value="0.01"><output for="dist"></output></label>
+  </div>
+  <p style="font-size:.86rem;color:var(--tenue)">Si integrano le equazioni di Eulero senza momenti esterni, con le inerzie del Cessna, partendo da una rotazione di 1 rad/s attorno a un asse più un piccolo disturbo sugli altri due. Attorno all'asse minimo e massimo la rotazione è stabile; attorno all'intermedio si ribalta periodicamente (effetto Džanibekov: lo vide un cosmonauta sulla stazione Salyut 7 svitando un dado ad alette). Le curve sono le tre componenti di \(\vec\omega\); la linea sottile è l'energia, che deve restare costante.</p>
+</div>
+
+<h2>L'orientamento: perché i quaternioni</h2>
+<p>Gli angoli di Eulero (prua, beccheggio, rollio) hanno due difetti per il calcolo: in verticale si bloccano (gimbal lock, capitolo 1) e le loro derivate richiedono seni, coseni e divisioni per \(\cos\theta\). Una matrice di rotazione 3×3 funziona sempre, ma ha 9 numeri per 3 gradi di libertà e, con gli errori di arrotondamento, smette lentamente di essere una rotazione.</p>
+<p>Il <b>quaternione unitario</b> è il compromesso ideale: quattro numeri, nessuna singolarità, e si "ripara" con una semplice normalizzazione. Una rotazione di un angolo \(\vartheta\) attorno all'asse unitario \(\hat n\) è</p>
+$$\mathbf q=\left(\cos\frac\vartheta2,\;\hat n\,\sin\frac\vartheta2\right)=(w,\;x,\;y,\;z),\qquad w^2+x^2+y^2+z^2=1.$$
+<p>Comporre due rotazioni è il prodotto di quaternioni (non commutativo, come le rotazioni). L'orientamento evolve secondo</p>
+<div class="box formula">
+  <div class="titolo">Cinematica del quaternione</div>
+  $$\dot{\mathbf q}=\tfrac12\,\mathbf q\otimes(0,\vec\omega)\qquad\Longrightarrow\qquad \mathbf q_{n+1}\approx\frac{\mathbf q_n\otimes\left(1,\;\tfrac12\vec\omega\,\Delta t\right)}{\left\lVert\mathbf q_n\otimes\left(1,\;\tfrac12\vec\omega\,\Delta t\right)\right\rVert}$$
+  <p>\(\vec\omega\) negli assi corpo, quindi si moltiplica a destra. Per piccoli \(\Delta t\), \((1,\tfrac12\vec\omega\Delta t)\) normalizzato è la rotazione di \(\lVert\vec\omega\rVert\Delta t\) attorno a \(\vec\omega\).</p>
+</div>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>Tutto il "motore" del corpo rigido sta in 9 righe (<a data-codice="js/fisica.js#L203-L212">js/fisica.js, righe 203–212</a>):</p>
+<pre><code>st.vel.addScaledVector(Fw,dt/m);                 // Newton: v += F/m · dt
+st.pos.addScaledVector(st.vel,dt);               //         x += v · dt
+Iw.set(Ix*st.w.x,Iy*st.w.y,Iz*st.w.z);           // H = I·ω
+tmp.crossVectors(st.w,Iw);                       // ω × (I·ω)
+st.w.x+=(Tb.x-tmp.x)/Ix*dt;                      // Eulero: ω += I⁻¹(M − ω×Iω) · dt
+st.w.y+=(Tb.y-tmp.y)/Iy*dt;
+st.w.z+=(Tb.z-tmp.z)/Iz*dt;
+dq.set(st.w.x*dt*0.5,st.w.y*dt*0.5,st.w.z*dt*0.5,1);   // (1, ω·dt/2)
+st.q.multiply(dq).normalize();                   // q = q ⊗ dq, poi lunghezza 1</code></pre>
+  <p>Prima di queste righe il programma ha sommato tutte le forze in <code>Fw</code> (assi terra) e tutti i momenti in <code>Tb</code> (assi corpo). Come si passa da queste equazioni a passi di calcolo discreti è l'argomento del <a href="08-integrazione.html">capitolo 8</a>.</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Il Cessna rolla a 30°/s e intanto imbarda a 5°/s. Quanto vale il momento giroscopico \(\vec\omega\times I\vec\omega\) sull'asse di beccheggio?</li>
+    <li>Scrivi il quaternione di una rotazione di 90° attorno all'asse verticale y. Verifica che ha lunghezza 1.</li>
+    <li>Perché nel codice si normalizza il quaternione a ogni passo? Che cosa succederebbe senza?</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>\(\omega_y=0{,}087\), \(\omega_z=0{,}524\) rad/s (segni a parte). Componente x: \(\omega_y I_z\omega_z-\omega_z I_y\omega_y=\omega_y\omega_z(I_z-I_y)=0{,}087\cdot0{,}524\cdot(1285-2667)\approx-63\) N·m: piccolo rispetto ai momenti aerodinamici (migliaia di N·m), ma c'è.</li>
+      <li>\(\mathbf q=(\cos45^\circ,\,0,\,\sin45^\circ,\,0)=(0{,}707;\;0;\;0{,}707;\;0)\); \(0{,}707^2+0{,}707^2=1\).</li>
+      <li>Il passo \((1,\tfrac12\vec\omega\Delta t)\) non ha lunghezza esattamente 1: senza normalizzare, il quaternione crescerebbe a ogni passo e la "rotazione" deformerebbe l'aereo (scala e taglio).</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const I=window.AEREO.inerzia,m=window.AEREO.massa;
+  for(const [a,v] of [['x',I.beccheggio],['y',I.imbardata],['z',I.rollio]]){
+    document.getElementById('i-'+a).textContent=FV.fmt(v)+' kg·m²';document.getElementById('k-'+a).textContent=FV.fmt(Math.sqrt(v/m),2)+' m';}
+  // inerzie ordinate: minimo (rollio), intermedio (beccheggio), massimo (imbardata)
+  const In=[I.rollio,I.beccheggio,I.imbardata];
+  const g=FV.grafico(document.getElementById('cvEul'),{x:[0,60],y:[-1.2,1.2],etX:'tempo (s)',etY:'ω (rad/s)',rapporto:0.45});
+  let asse=1,dist=0.01;
+  function simula(){
+    let w=[dist,dist,dist];w[asse]=1;
+    const dt=0.002,ts=[],s=[[],[],[]],E=[];const E0=0.5*(In[0]*w[0]**2+In[1]*w[1]**2+In[2]*w[2]**2);
+    const der=w=>[-(In[2]-In[1])*w[1]*w[2]/In[0],-(In[0]-In[2])*w[2]*w[0]/In[1],-(In[1]-In[0])*w[0]*w[1]/In[2]];
+    for(let t=0;t<=60;t+=dt){
+      // Runge-Kutta del 4° ordine (vedi capitolo 8)
+      const k1=der(w),k2=der(w.map((v,i)=>v+k1[i]*dt/2)),k3=der(w.map((v,i)=>v+k2[i]*dt/2)),k4=der(w.map((v,i)=>v+k3[i]*dt));
+      w=w.map((v,i)=>v+(k1[i]+2*k2[i]+2*k3[i]+k4[i])*dt/6);
+      if(Math.round(t/dt)%25===0){ts.push(t);for(let i=0;i<3;i++)s[i].push(w[i]);E.push(0.5*(In[0]*w[0]**2+In[1]*w[1]**2+In[2]*w[2]**2)/E0);}
+    }
+    g.pulisci();g.assi();
+    const col=['accento2','accento','verde'],nom=['rollio','beccheggio','imbardata'];
+    for(let i=0;i<3;i++){g.serie(ts,s[i],FV.colore(col[i]),i===asse?2.4:1.6);g.testo(2+i*12,1.12,'ω '+nom[i],FV.colore(col[i]));}
+    g.serie(ts,E,FV.colore('tenue'),0.8);
+  }
+  document.getElementById('asse').addEventListener('change',e=>{asse=+e.target.value;simula();});
+  FV.cursore('dist',v=>{dist=v;simula();},v=>FV.fmt(v,3)+' rad/s').agg();
+  window.addEventListener('resize',simula);
+});
+</script>
+</body>
+</html>

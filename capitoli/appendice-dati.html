@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>I numeri del Cessna 172 — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/c172.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Appendice: i numeri del Cessna 172</h1>
+<p class="sottotitolo">Tutti i parametri del modello, letti dallo stesso file che usa il simulatore (<code>dati/c172.js</code>).</p>
+<p>Le tabelle qui sotto non sono scritte a mano: la pagina carica il file dei dati del simulatore e le compone. Se si cambia un numero nel file, cambia anche qui. Unità SI (metri, chilogrammi, secondi, newton); angoli in gradi; coefficienti aerodinamici per radiante.</p>
+<div id="tabelle"></div>
+
+<h2>Grandezze derivate</h2>
+<table id="derivate"></table>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const A=window.AEREO,el=document.getElementById('tabelle');
+  const sez=[
+    ['Masse e inerzie',[
+      ['massa',A.massa,'kg','aereo con pilota e carburante'],
+      ['inerzia di beccheggio',A.inerzia.beccheggio,'kg·m²','muso su/giù (asse x, l\'ala)'],
+      ['inerzia d\'imbardata',A.inerzia.imbardata,'kg·m²','muso destra/sinistra (asse y)'],
+      ['inerzia di rollio',A.inerzia.rollio,'kg·m²','ali su/giù (asse z, la fusoliera)']]],
+    ['Ala',[
+      ['superficie S',A.ala.superficie,'m²',''],['apertura b',A.ala.apertura,'m',''],['corda media c',A.ala.corda,'m','']]],
+    ['Motore ed elica',[
+      ['spinta statica',A.motore.spintaStatica,'N','a tutta manetta, da fermo'],
+      ['velocità di spinta nulla',A.motore.velocitaMaxElica,'m/s','oltre, l\'elica non spinge più'],
+      ['diametro dell\'elica',A.motore.diametroElica,'m',''],
+      ['giri minimi / massimi',A.motore.giriMin+' / '+A.motore.giriMax,'giri/min','']]],
+    ['Carburante',[
+      ['capacità utilizzabile',A.carburante.capacita,'gal','1 gallone USA = 3,785 litri'],
+      ['consumo al minimo',A.carburante.consumoMin,'gal/h',''],['consumo massimo',A.carburante.consumoMax,'gal/h','al livello del mare, ai giri massimi']]],
+    ['Portanza e resistenza (capitolo 3)',[
+      ['C_L0',A.aero.CL0,'','portanza ad α = 0'],['C_Lα',A.aero.CLalfa,'1/rad','pendenza della retta di portanza'],
+      ['C_Lq',A.aero.CLq,'1/rad','portanza dovuta al rateo di beccheggio'],['C_Lδe',A.aero.CLde,'1/rad','portanza dell\'elevatore'],
+      ['α di stallo',A.aero.alfaStallo,'°','senza flap'],['C_D0',A.aero.CD0,'','resistenza parassita'],['e',A.aero.e,'','fattore di Oswald'],
+      ['C_Yβ',A.aero.CYbeta,'1/rad','forza laterale in derapata'],['C_Yδr',A.aero.CYdr,'1/rad','forza laterale del timone']]],
+    ['Momenti (capitolo 6)',Object.entries({Cm0:'beccheggio ad α = 0',Cmalfa:'stabilità longitudinale',Cmq:'smorzamento di beccheggio',Cmde:'efficacia dell\'elevatore',Cmflap:'beccheggio dei flap',
+      Clbeta:'effetto diedro',Clp:'smorzamento di rollio',Clr:'rollio da imbardata',Clda:'efficacia degli alettoni',Cldr:'rollio del timone',
+      Cnbeta:'stabilità di banderuola',Cnp:'imbardata da rollio',Cnr:'smorzamento d\'imbardata',Cnda:'imbardata inversa degli alettoni',Cndr:'efficacia del timone'})
+      .map(([k,d])=>[k.replace(/^C(.)(.*)$/,(m,a,b)=>'C_'+a+b.replace('alfa','α').replace('beta','β').replace('de','δe').replace('da','δa').replace('dr','δr').replace('flap',',flap')),A.aero[k],'',d])],
+    ['Comandi',[
+      ['elevatore',A.comandi.elevatore,'°','escursione massima'],['alettoni',A.comandi.alettoni,'°',''],['timone',A.comandi.timone,'°',''],['ruotino',A.comandi.ruotino,'°','sterzata massima']]],
+    ['Flap',[
+      ['posizioni',A.flap.posizioni.join(', '),'°',''],['ΔC_L a flap pieni',A.flap.CL,'',''],['ΔC_D a flap pieni',A.flap.CD,'',''],['tempo per tacca',A.flap.secondiPerTacca,'s','']]],
+    ['Velocità di riferimento (dal manuale di volo)',Object.entries({vso:'stallo con flap',vs1:'stallo senza flap',vr:'rotazione',vy:'miglior salita',vfe:'massima con flap',vno:'massima di crociera',vne:'da non superare mai',avvicinamento:'avvicinamento'})
+      .map(([k,d])=>[k.toUpperCase().replace('AVVICINAMENTO','avvicinamento'),A.velocita[k],'kt',d])],
+    ['Limiti',[
+      ['velocità verticale al contatto',A.limiti.vsContatto,'m/s','oltre, il carrello si rompe'],['fattore di carico massimo',A.limiti.gMax,'g',''],['fattore di carico minimo',A.limiti.gMin,'g','']]],
+  ];
+  const num=v=>typeof v==='number'?v.toLocaleString('it-IT',{maximumFractionDigits:4}):v;   // tutte le cifre del file, niente di più
+  el.innerHTML=sez.map(([t,r])=>`<h2>${t}</h2><table><tr><th>Grandezza</th><th>Valore</th><th>Unità</th><th>Note</th></tr>`+
+    r.map(([n,v,u,d])=>`<tr><td>${n}</td><td class="n">${num(v)}</td><td>${u}</td><td>${d}</td></tr>`).join('')+'</table>').join('')+
+    '<h2>Carrello</h2><table><tr><th>Ruota</th><th>x</th><th>y</th><th>z</th><th>k (N/m)</th><th>c (N·s/m)</th></tr>'+
+    A.carrello.map(r=>`<tr><td>${r.nome}</td><td class="n">${FV.fmt(r.x,2)}</td><td class="n">${FV.fmt(r.y,2)}</td><td class="n">${FV.fmt(r.z,2)}</td><td class="n">${FV.fmt(r.rigidezza)}</td><td class="n">${FV.fmt(r.smorzamento)}</td></tr>`).join('')+'</table>';
+  // derivate
+  const S=A.ala.superficie,b=A.ala.apertura,AR=b*b/S,k=1/(Math.PI*A.aero.e*AR),CLmax=A.aero.CL0+A.aero.CLalfa*A.aero.alfaStallo*FV.D2R;
+  const Vs=Math.sqrt(2*A.massa*9.81/(1.225*S*CLmax)),E=1/(2*Math.sqrt(A.aero.CD0*k)),CLs=Math.sqrt(A.aero.CD0/k),Ve=Math.sqrt(2*A.massa*9.81/(1.225*S*CLs));
+  const der=[['allungamento A = b²/S',FV.fmt(AR,2),'capitolo 3'],['k = 1/(π e A)',FV.fmt(k,4),'resistenza indotta'],['C_L max (senza flap)',FV.fmt(CLmax,2),''],
+    ['velocità di stallo (senza flap, al suolo)',FV.fmt(Vs*FV.KT,1)+' kt',''],['efficienza massima',FV.fmt(E,1),''],['velocità di massima efficienza',FV.fmt(Ve*FV.KT,0)+' kt','planata migliore'],
+    ['carico alare m/S',FV.fmt(A.massa/S,1)+' kg/m²','']];
+  document.getElementById('derivate').innerHTML='<tr><th>Grandezza</th><th>Valore</th><th>Note</th></tr>'+der.map(([n,v,d])=>`<tr><td>${n}</td><td class="n">${v}</td><td>${d}</td></tr>`).join('');
+});
+</script>
+</body>
+</html>

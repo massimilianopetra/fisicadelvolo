@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sistemi di riferimento — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Sistemi di riferimento e angoli</h1>
+<p class="sottotitolo">Prima di scrivere una sola formula bisogna decidere <i>da dove</i> si guarda: dal suolo o dall'aereo.</p>
+
+<h2>Due punti di vista</h2>
+<p>Un aereo si sposta rispetto alla Terra, ma le forze che lo sostengono nascono sull'aereo stesso: la portanza è perpendicolare alle ali, la spinta è lungo l'asse dell'elica. Conviene quindi usare <b>due sistemi di riferimento</b> e passare dall'uno all'altro:</p>
+<ul>
+  <li><b>Assi terra</b> (fissi): servono per la posizione, la quota, la rotta, il peso (sempre verso il basso).</li>
+  <li><b>Assi corpo</b> (solidali con l'aereo, con l'origine nel baricentro): servono per le forze aerodinamiche, la spinta, i momenti d'inerzia, le velocità di rotazione.</li>
+</ul>
+
+<figure>
+<svg viewBox="0 0 640 300" width="640" role="img" aria-label="Assi corpo del Cessna visto dall'alto e di lato">
+  <defs><marker id="pf" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="currentColor"/></marker></defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--tenue)">
+    <!-- vista dall'alto: muso in alto -->
+    <path d="M160,40 C168,40 172,60 172,90 L170,200 L166,250 L154,250 L150,200 L148,90 C148,60 152,40 160,40Z"/>
+    <path d="M60,105 L260,105 L260,128 L60,128Z"/>
+    <path d="M125,232 L195,232 L195,246 L125,246Z"/>
+    <path d="M150,36 L170,36" stroke-width="3"/>
+  </g>
+  <g stroke-width="2.4" style="color:var(--accento2)" stroke="currentColor"><line x1="160" y1="30" x2="160" y2="6" marker-end="url(#pf)"/></g>
+  <g style="color:var(--accento)" stroke="currentColor" stroke-width="2.4">
+    <line x1="160" y1="118" x2="250" y2="118" marker-end="url(#pf)"/>
+    <line x1="160" y1="118" x2="160" y2="215" marker-end="url(#pf)"/>
+  </g>
+  <g font-family="B612" font-size="14" fill="currentColor" style="color:var(--testo)">
+    <text x="254" y="114">x (ala destra)</text><text x="168" y="222">z (verso la coda)</text>
+    <text x="40" y="285">Vista dall'alto</text>
+    <text x="172" y="22" style="fill:var(--accento2)">direzione del volo</text>
+  </g>
+  <!-- vista di lato: muso a destra -->
+  <g fill="none" stroke="currentColor" stroke-width="1.6" style="color:var(--tenue)" transform="translate(470,150)">
+    <path d="M90,-4 L84,-14 L45,-20 L22,-38 L-30,-38 L-52,-20 L-150,-12 L-178,-10 L-180,0 L-150,3 L-40,18 L35,20 L78,14Z"/>
+    <path d="M-140,-12 L-170,-60 L-188,-60 L-180,-10"/>
+    <path d="M-30,-40 L30,-40" stroke-width="5"/>
+    <path d="M93,-35 L93,35" stroke-width="3"/>
+  </g>
+  <g style="color:var(--accento)" stroke="currentColor" stroke-width="2.4">
+    <line x1="470" y1="150" x2="470" y2="70" marker-end="url(#pf)"/>
+    <line x1="470" y1="150" x2="380" y2="150" marker-end="url(#pf)"/>
+  </g>
+  <g font-family="B612" font-size="14" fill="currentColor" style="color:var(--testo)">
+    <text x="478" y="74">y (in alto)</text><text x="352" y="172">z (coda)</text>
+    <text x="380" y="285">Vista di lato</text>
+  </g>
+</svg>
+<figcaption>Gli assi corpo usati dal simulatore: x verso l'ala destra, y verso l'alto, z verso la coda (il muso è dalla parte di z negativo). È la convenzione della libreria grafica three.js.</figcaption>
+</figure>
+
+<p>Gli assi terra seguono la stessa idea: <b>x verso est, y verso l'alto, z verso sud</b> (quindi il nord è dalla parte di z negativo). Una rotta (prua) \(\psi\) misurata in gradi dalla bussola, da nord in senso orario, corrisponde al vettore orizzontale</p>
+$$\hat{d}(\psi)=\left(\sin\psi,\;0,\;-\cos\psi\right).$$
+<p>Verifica: per \(\psi=90^\circ\) (est) si ottiene \((1,0,0)\), cioè l'asse x; per \(\psi=0^\circ\) (nord) \((0,0,-1)\).</p>
+
+<div class="box attenzione">
+  <div class="titolo">Attenzione alle convenzioni</div>
+  <p>Nei libri di meccanica del volo si usano quasi sempre altri assi corpo: <b>x avanti, y a destra, z in basso</b>. Le velocità di rotazione si chiamano allora \(p\) (rollio), \(q\) (beccheggio), \(r\) (imbardata). Passare da una convenzione all'altra è un buon esercizio di attenzione: nel simulatore</p>
+  $$p=-\omega_z,\qquad q=\omega_x,\qquad r=-\omega_y,$$
+  <p>dove \(\vec\omega=(\omega_x,\omega_y,\omega_z)\) è la velocità angolare negli assi three.js. I coefficienti aerodinamici (capitoli 3 e 6) sono scritti nella convenzione dei libri, così si possono confrontare con le tabelle pubblicate.</p>
+</div>
+
+<h2>Gli angoli dell'assetto</h2>
+<p>L'orientamento dell'aereo rispetto al suolo si descrive con tre angoli (gli <b>angoli di Eulero</b>), applicati in quest'ordine:</p>
+<table>
+  <tr><th>Angolo</th><th>Simbolo</th><th>Che cosa misura</th><th>Strumento</th></tr>
+  <tr><td>Prua (imbardata)</td><td>\(\psi\)</td><td>direzione del muso rispetto al nord</td><td>bussola, indicatore di prua</td></tr>
+  <tr><td>Beccheggio</td><td>\(\theta\)</td><td>muso sopra o sotto l'orizzonte</td><td>orizzonte artificiale</td></tr>
+  <tr><td>Rollio (inclinazione)</td><td>\(\varphi\)</td><td>ali inclinate a destra o a sinistra</td><td>orizzonte artificiale</td></tr>
+</table>
+<p>Gli angoli di Eulero sono comodi da leggere, ma hanno un difetto grave: con il muso esattamente in verticale (\(\theta=\pm90^\circ\)) prua e rollio diventano la stessa rotazione e le formule si bloccano (<i>gimbal lock</i>). Per questo il simulatore tiene l'orientamento in un <b>quaternione</b> e calcola gli angoli solo per mostrarli sugli strumenti (vedi il <a href="07-corpo-rigido.html">capitolo 7</a>).</p>
+
+<h2>Il vento relativo: angolo d'attacco e di derapata</h2>
+<p>Per l'aerodinamica non conta come l'aereo si muove rispetto al suolo, ma rispetto all'<b>aria</b>. Se \(\vec v\) è la velocità dell'aereo e \(\vec w\) quella del vento, la velocità dell'aria che l'aereo "sente" è \(\vec v_a=\vec v-\vec w\). Portata negli assi corpo, \(\vec v_a=(v_x,v_y,v_z)\), definisce due angoli fondamentali:</p>
+<div class="box formula">
+  <div class="titolo">Angolo d'attacco e angolo di derapata</div>
+  $$V=\lVert\vec v_a\rVert,\qquad u=-v_z,\qquad \alpha=\operatorname{atan2}(-v_y,\;u),\qquad \beta=\arcsin\frac{v_x}{V}$$
+  <p>\(\alpha\) (alfa) è l'angolo fra la direzione dell'aria e l'asse longitudinale, nel piano verticale dell'aereo: da lui dipende la portanza. \(\beta\) (beta) è l'angolo laterale: un aereo "in derapata" riceve l'aria un po' di fianco (la pallina dello strumento non è al centro).</p>
+</div>
+
+<p>Tre angoli si confondono spesso, ma sono diversi: l'<b>assetto</b> \(\theta\) (dove punta il muso), la <b>pendenza della traiettoria</b> \(\gamma\) (dove va l'aereo) e l'<b>angolo d'attacco</b> \(\alpha\). Con le ali livellate e senza vento</p>
+$$\theta=\gamma+\alpha.$$
+<p>Un aereo può avere il muso alto e scendere lo stesso: succede in atterraggio, quando vola lento con un grande angolo d'attacco.</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — assetto, traiettoria e angolo d'attacco</div>
+  <canvas id="cvAngoli"></canvas>
+  <div class="comandi">
+    <label>Beccheggio θ <input type="range" id="th" min="-15" max="25" step="0.5" value="8"><output for="th"></output></label>
+    <label>Pendenza γ <input type="range" id="ga" min="-15" max="15" step="0.5" value="3"><output for="ga"></output></label>
+  </div>
+  <div class="risultati">Angolo d'attacco α = θ − γ: <b id="ris-a"></b> <span id="ris-n"></span></div>
+</div>
+
+<h2>Dagli assi corpo agli assi terra</h2>
+<p>Un vettore scritto negli assi corpo (per esempio la portanza) si porta negli assi terra con una <b>rotazione</b>: \(\vec F_{terra}=R\,\vec F_{corpo}\), dove \(R\) è una matrice 3×3 ortogonale (\(R^{-1}=R^{T}\)). Per una sola rotazione attorno all'asse verticale di un angolo \(\psi\):</p>
+$$R_y(\psi)=\begin{pmatrix}\cos\psi&0&\sin\psi\\0&1&0\\-\sin\psi&0&\cos\psi\end{pmatrix}$$
+<p>La rotazione completa è il prodotto delle tre rotazioni elementari (prua, beccheggio, rollio). Nel programma questo lavoro lo fa il quaternione: <code>F.applyQuaternion(q)</code> porta un vettore dagli assi corpo agli assi terra, e con il quaternione inverso si fa il percorso opposto.</p>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>In <a data-codice="js/fisica.js#L83-L92">js/fisica.js, righe 83–92</a>: il vento relativo viene portato negli assi corpo con il quaternione inverso, poi si calcolano \(V\), \(\alpha\), \(\beta\) e i ratei \(p,q,r\):</p>
+<pre><code>invQ.copy(st.q).invert();
+air.copy(st.vel).sub(vento);
+vb.copy(air).applyQuaternion(invQ);          // vento relativo in assi corpo
+const V=vb.length();
+const u=-vb.z;
+const alpha=V>0.5?Math.atan2(-vb.y,u):0;
+const beta=V>0.5?Math.asin(clamp(vb.x/V,-1,1)):0;
+const p=-st.w.z, q=st.w.x, r=-st.w.y;      // rollio, beccheggio, imbardata</code></pre>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Un aereo vola verso sud-ovest (\(\psi=225^\circ\)). Scrivi il vettore \(\hat d(\psi)\).</li>
+    <li>In avvicinamento l'aereo scende con \(\gamma=-3^\circ\) e ha il muso \(2^\circ\) sopra l'orizzonte. Qual è l'angolo d'attacco?</li>
+    <li>Negli assi corpo l'aria arriva con \(\vec v_a=(0;\,-4{,}2;\,-50)\) m/s. Calcola \(V\) e \(\alpha\).</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>\(\hat d=(\sin225^\circ,0,-\cos225^\circ)=(-0{,}707;\;0;\;0{,}707)\): verso ovest (x negativo) e verso sud (z positivo).</li>
+      <li>\(\alpha=\theta-\gamma=2^\circ-(-3^\circ)=5^\circ\).</li>
+      <li>\(V=\sqrt{4{,}2^2+50^2}\approx50{,}2\) m/s; \(u=50\), \(\alpha=\operatorname{atan2}(4{,}2;\,50)\approx4{,}8^\circ\).</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const cv=document.getElementById('cvAngoli'),ctx=cv.getContext('2d');
+  let th=8,ga=3;
+  function disegna(){
+    const r=window.devicePixelRatio||1,W=cv.clientWidth,H=Math.round(W*0.45);
+    cv.style.height=H+'px';cv.width=W*r;cv.height=H*r;ctx.setTransform(r,0,0,r,0,0);ctx.clearRect(0,0,W,H);
+    const cx=W*0.3,cy=H*0.58,s=W/30;
+    // orizzonte
+    ctx.strokeStyle=FV.colore('linea');ctx.lineWidth=1.5;ctx.setLineDash([6,6]);
+    ctx.beginPath();ctx.moveTo(10,cy);ctx.lineTo(W-10,cy);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=FV.colore('tenue');ctx.font='12px B612';ctx.fillText('orizzonte',14,cy-6);
+    FV.cessnaLato(ctx,cx,cy,s,th*FV.D2R);
+    // asse longitudinale e velocità
+    const T=th*FV.D2R,G=ga*FV.D2R,L=W*0.64;
+    ctx.strokeStyle=FV.colore('accento');ctx.lineWidth=1.5;ctx.setLineDash([5,4]);
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(T)*L,cy-Math.sin(T)*L);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=FV.colore('accento');ctx.font='13px B612';ctx.textAlign='right';
+    ctx.fillText('asse dell\'aereo',cx+Math.cos(T)*L,cy-Math.sin(T)*L+(T>=G?-8:18));
+    FV.freccia(ctx,cx,cy,cx+Math.cos(G)*L,cy-Math.sin(G)*L,FV.colore('accento2'),2.5);
+    ctx.fillStyle=FV.colore('accento2');ctx.fillText('velocità (traiettoria)',cx+Math.cos(G)*L,cy-Math.sin(G)*L+(T>=G?20:-8));
+    ctx.textAlign='left';
+    // archi degli angoli, oltre il muso
+    const arco=(r0,a0,a1,col,testo)=>{ctx.strokeStyle=ctx.fillStyle=col;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(cx,cy,r0,-Math.max(a0,a1),-Math.min(a0,a1));ctx.stroke();
+      const m=Math.max(a0,a1);ctx.font='bold 16px B612';ctx.fillText(testo,cx+Math.cos(m)*r0+4,cy-Math.sin(m)*r0-6);};
+    arco(L*0.42,0,T,FV.colore('accento'),'θ');
+    arco(L*0.56,0,G,FV.colore('verde'),'γ');
+    arco(L*0.78,G,T,FV.colore('viola'),'α');
+  }
+  const agg=()=>{const a=th-ga;document.getElementById('ris-a').textContent=FV.fmt(a,1)+'°';
+    document.getElementById('ris-n').textContent=a>16?'— oltre lo stallo del Cessna (16°)!':a<-2?'— ala con portanza negativa':'';disegna();};
+  FV.cursore('th',v=>{th=v;agg();},v=>FV.fmt(v,1)+'°').agg();
+  FV.cursore('ga',v=>{ga=v;agg();},v=>FV.fmt(v,1)+'°').agg();
+  window.addEventListener('resize',disegna);
+});
+</script>
+</body>
+</html>

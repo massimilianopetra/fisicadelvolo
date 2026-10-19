@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portanza e resistenza — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/c172.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Portanza e resistenza</h1>
+<p class="sottotitolo">Due numeri senza dimensioni, \(C_L\) e \(C_D\), riassumono tutta la complicazione dell'aria che scorre attorno all'ala.</p>
+
+<h2>Perché l'ala sostiene</h2>
+<p>L'ala, con il suo profilo e un piccolo angolo d'attacco, <b>devia verso il basso</b> l'aria che la investe. Per il terzo principio della dinamica, se l'ala spinge l'aria in basso l'aria spinge l'ala in alto. Lo stesso fatto, visto dalle pressioni: sopra l'ala l'aria accelera e la pressione cala, sotto rallenta e la pressione cresce (Bernoulli); la differenza di pressione, su tutta la superficie, è la portanza.</p>
+<div class="box attenzione">
+  <div class="titolo">Un mito da sfatare</div>
+  <p>Molti libri dicono che l'aria sopra l'ala va più veloce "perché deve fare più strada e arrivare insieme a quella di sotto". È falso: l'aria di sopra arriva <i>prima</i> al bordo d'uscita, e un'ala piatta o un aereo in volo rovescio volano lo stesso. Quello che conta è la deviazione del flusso, che dipende dall'angolo d'attacco e dalla curvatura del profilo.</p>
+</div>
+
+<h2>I coefficienti aerodinamici</h2>
+<p>Calcolare il flusso attorno a un aereo intero è un lavoro da supercomputer. L'idea della meccanica del volo è misurare le forze una volta per tutte (in galleria del vento o in volo) e scriverle come <b>pressione dinamica × superficie × coefficiente</b>:</p>
+<div class="box formula">
+  <div class="titolo">Forze aerodinamiche</div>
+  $$L=\bar q\,S\,C_L\qquad D=\bar q\,S\,C_D\qquad Y=\bar q\,S\,C_Y\qquad\left(\bar q=\tfrac12\rho V^2\right)$$
+  <p>\(L\) portanza (perpendicolare al vento relativo), \(D\) resistenza (opposta al vento relativo), \(Y\) forza laterale; \(S\) è la superficie alare (16,2 m² per il Cessna 172). I coefficienti dipendono dagli angoli \(\alpha\), \(\beta\), dai flap e dai comandi, ma <i>non</i> dalla velocità: tutta la dipendenza da \(V\) e dalla quota è in \(\bar q\).</p>
+</div>
+<p>È un'analisi dimensionale: \(C_L\) e \(C_D\) sono numeri puri. Questo permette di provare un modellino in galleria del vento e usare gli stessi coefficienti per l'aereo vero (a parità di numero di Reynolds e di Mach).</p>
+
+<h2>La curva di portanza e lo stallo</h2>
+<p>Per angoli d'attacco piccoli la portanza cresce in modo lineare con \(\alpha\):</p>
+$$C_L=C_{L0}+C_{L\alpha}\,\alpha+\Delta C_{L,flap}$$
+<p>Per il Cessna \(C_{L0}=0{,}35\) (il profilo è curvo: sostiene anche ad \(\alpha=0\)) e \(C_{L\alpha}=4{,}9\) per radiante. La teoria del profilo sottile dà \(2\pi\) per radiante; un'ala di allungamento finito \(A=b^2/S\) ne perde una parte, e la formula approssimata</p>
+$$C_{L\alpha}\approx\frac{2\pi}{1+2/A}=\frac{2\pi}{1+2/7{,}47}\approx4{,}96$$
+<p>coincide quasi con il valore del modello. Oltre l'<b>angolo di stallo</b> (16° per il Cessna senza flap) il flusso si stacca dal dorso dell'ala, la portanza crolla e la resistenza esplode. Il simulatore raccorda la retta con la curva di una lastra piana, \(C_L\approx\sin2\alpha\), lungo 8° di angolo, con un raccordo morbido \(s(t)=t^2(3-2t)\).</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — curva di portanza e polare del Cessna 172</div>
+  <div class="colonne"><canvas id="cvCL"></canvas><canvas id="cvPol"></canvas></div>
+  <div class="comandi">
+    <label>Angolo d'attacco α <input type="range" id="al" min="-10" max="26" step="0.5" value="4"><output for="al"></output></label>
+    <label>Flap <input type="range" id="fl" min="0" max="30" step="10" value="0"><output for="fl"></output></label>
+  </div>
+  <div class="risultati">
+    <span>C<sub>L</sub> <b id="r-cl"></b></span><span>C<sub>D</sub> <b id="r-cd"></b></span><span>efficienza L/D <b id="r-e"></b></span>
+    <span>velocità per il volo livellato <b id="r-v"></b></span><span id="r-st"></span>
+  </div>
+</div>
+
+<h2>La velocità di stallo</h2>
+<p>In volo livellato la portanza equilibra il peso, \(L=mg\). Il \(C_L\) più grande possibile, \(C_{L\max}\), corrisponde alla velocità più bassa a cui l'aereo si sostiene:</p>
+<div class="box formula">
+  <div class="titolo">Velocità di stallo</div>
+  $$V_S=\sqrt{\frac{2\,m\,g}{\rho\,S\,C_{L\max}}}$$
+</div>
+<p>Con i numeri del modello: \(C_{L\max}=0{,}35+4{,}9\cdot0{,}279=1{,}72\) senza flap, e</p>
+$$V_S=\sqrt{\frac{2\cdot1000\cdot9{,}81}{1{,}225\cdot16{,}2\cdot1{,}72}}=24{,}0\ \text{m/s}=46{,}6\ \text{nodi}.$$
+<p>Il manuale del Cessna 172 dà 48 nodi senza flap e 40 con i flap a 30° (il modello dà 42). Si noti che \(V_S\) cresce con la radice del peso, e che con la velocità <i>indicata</i> non dipende dalla quota (capitolo 2).</p>
+
+<h2>La resistenza e la polare</h2>
+<p>La resistenza ha due origini principali:</p>
+<ul>
+  <li><b>Resistenza parassita</b> \(C_{D0}\): attrito dell'aria sulla pelle dell'aereo, forma della fusoliera, carrello fisso, antenne. Non dipende dalla portanza.</li>
+  <li><b>Resistenza indotta</b>: è il "prezzo" della portanza. Alle estremità l'aria passa dal ventre (alta pressione) al dorso (bassa pressione) e forma due vortici; il flusso dietro l'ala scende (downwash) e la forza aerodinamica si inclina all'indietro. Cresce con il quadrato di \(C_L\):</li>
+</ul>
+<div class="box formula">
+  <div class="titolo">Polare parabolica</div>
+  $$C_D=C_{D0}+k\,C_L^2,\qquad k=\frac{1}{\pi\,e\,A},\qquad A=\frac{b^2}{S}$$
+  <p>\(e\) è il fattore di Oswald (0,75 nel modello; 1 per un'ala ellittica ideale). Per il Cessna \(A=11^2/16{,}2=7{,}47\) e \(k=0{,}0568\). Gli alianti hanno ali lunghissime (\(A\) fino a 30 e più) proprio per avere poca resistenza indotta.</p>
+</div>
+<p>L'<b>efficienza</b> \(E=L/D=C_L/C_D\) è massima dove la retta per l'origine tocca la polare. Derivando \(C_L/(C_{D0}+kC_L^2)\) e ponendo la derivata a zero si trova che in quel punto la resistenza indotta è uguale a quella parassita:</p>
+$$C_L^{*}=\sqrt{\frac{C_{D0}}{k}}=0{,}69,\qquad E_{\max}=\frac{1}{2\sqrt{C_{D0}\,k}}=12{,}8$$
+<p>Con il motore spento il Cessna del modello percorre quindi circa 12,8 km per ogni km di quota persa, volando a \(V=\sqrt{2mg/(\rho S C_L^{*})}=37{,}9\) m/s = 74 nodi (il manuale dice 68 nodi). Ne riparliamo nel <a href="04-prestazioni.html">capitolo 4</a>.</p>
+
+<h3>Il modello completo del simulatore</h3>
+<p>Al modello di base il simulatore aggiunge alcuni termini, tutti spiegabili:</p>
+$$C_L=C_{L0}+C_{L\alpha}\alpha+\Delta C_{L,f}\,\delta_f+C_{Lq}\,\frac{q\,c}{2V}+C_{L\delta_e}\,\delta_e$$
+$$C_D=C_{D0}+\Delta C_{D,f}\,\delta_f+k\,\phi_{suolo}\,C_L^2+1{,}2\sin^2\!\alpha\cdot s_{stallo}+0{,}5\sin^2\!\beta$$
+<ul>
+  <li>\(\delta_f\in[0,1]\): flap (a 30° aggiungono 0,5 di \(C_L\) e 0,05 di \(C_D\), e anticipano lo stallo di 1,5°);</li>
+  <li>\(C_{Lq}\,qc/2V\): quando l'aereo cabra (\(q>0\)) la coda scende e il suo angolo d'attacco cresce; \(qc/2V\) è un rateo "adimensionale";</li>
+  <li>\(C_{L\delta_e}\delta_e\): anche l'elevatore produce un po' di portanza;</li>
+  <li>\(\phi_{suolo}\): <b>effetto suolo</b>, vicino alla pista i vortici d'estremità sono schiacciati e la resistenza indotta cala;</li>
+  <li>gli ultimi due termini: la resistenza enorme dell'ala stallata e dell'aereo che vola di traverso.</li>
+</ul>
+<div class="box formula">
+  <div class="titolo">Effetto suolo (formula di McCormick)</div>
+  $$\phi_{suolo}=\frac{(16\,h/b)^2}{1+(16\,h/b)^2}$$
+  <p>\(h\) è l'altezza dell'ala dal suolo, \(b\) l'apertura alare. A un'altezza pari a mezza apertura (5,5 m) la resistenza indotta è al 98,5%; a 1,5 m scende al 82%. Per questo in atterraggio l'aereo "galleggia" sopra la pista.</p>
+</div>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>Coefficienti di portanza con lo stallo e resistenza (<a data-codice="js/fisica.js#L97-L109">js/fisica.js, righe 97–109</a>):</p>
+<pre><code>const aS=(ae.alfaStallo-1.5*fl)*D2R, aN=-12*D2R, dCLf=A.flap.CL*fl;
+let CL,stallT=0;
+if(alpha>aS){stallT=s01((alpha-aS)/(8*D2R));
+  CL=lerp(ae.CL0+ae.CLalfa*aS+dCLf,Math.sin(2*alpha)*(1+0.3*fl),stallT);}
+else if(alpha<aN){...}
+else CL=ae.CL0+ae.CLalfa*alpha+dCLf;
+CL+=ae.CLq*q*cc+ae.CLde*de;
+const hAla=Math.max(0.3,st.agl+altRuote+0.8)/b, ge=16*hAla*hAla/(1+16*hAla*hAla);
+const CD=ae.CD0+A.flap.CD*fl+kInd*ge*CL*CL+1.2*sa*sa*stallT+0.5*sb*sb;</code></pre>
+  <p>Poi le forze negli assi corpo (<a data-codice="js/fisica.js#L130-L139">righe 130–139</a>): la direzione della portanza è il prodotto vettoriale fra l'asse x (l'ala) e la direzione del vento relativo, quindi è perpendicolare a entrambi.</p>
+<pre><code>vhat.copy(vb).multiplyScalar(1/V);   // direzione del vento relativo
+ldir.crossVectors(Xb,vhat);          // perpendicolare all'ala e al vento
+Fb.addScaledVector(ldir,qS*CL).addScaledVector(vhat,-qS*CD);</code></pre>
+</div>
+<div class="box attenzione">
+  <div class="titolo">Una piccola sorpresa nel codice</div>
+  <p>Nella formula dell'effetto suolo il simulatore scrive \(16\,(h/b)^2\) invece di \((16\,h/b)^2\): l'effetto suolo del gioco è quindi più forte e arriva più in alto di quello della formula di McCormick. Trovare differenze così fra teoria e programma, e capire se sono volute, è un ottimo esercizio di revisione del codice.</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Quanto vale la velocità di stallo del Cessna se pesa 900 kg invece di 1000? E in virata a 60° di inclinazione, dove la portanza deve essere il doppio del peso?</li>
+    <li>Un aliante ha \(C_{D0}=0{,}012\), \(e=0{,}9\), \(A=20\). Calcola \(E_{\max}\).</li>
+    <li>A 100 nodi in volo livellato (al suolo), quale \(C_L\) serve al Cessna? E quanta resistenza (in newton) produce?</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>\(V_S\propto\sqrt{m}\): \(46{,}6\sqrt{0{,}9}=44{,}2\) nodi. Con portanza doppia: \(46{,}6\sqrt2=65{,}9\) nodi. Si stalla anche ad alta velocità, se si chiede troppo all'ala!</li>
+      <li>\(k=1/(\pi\cdot0{,}9\cdot20)=0{,}0177\); \(E_{\max}=1/(2\sqrt{0{,}012\cdot0{,}0177})=34{,}3\).</li>
+      <li>\(\bar q=1621\) Pa; \(C_L=9810/(1621\cdot16{,}2)=0{,}374\); \(C_D=0{,}027+0{,}0568\cdot0{,}374^2=0{,}0349\); \(D=1621\cdot16{,}2\cdot0{,}0349=917\) N. L'efficienza è 10,7: a 100 nodi si vola più veloci del punto di massima efficienza.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const A=window.AEREO,ae=A.aero,D2R=FV.D2R,S=A.ala.superficie,b=A.ala.apertura,m=A.massa;
+  const kInd=1/(Math.PI*ae.e*(b*b/S));
+  const s01=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);},lerp=(a,c,t)=>a+(c-a)*t;
+  // stesso calcolo di js/fisica.js (senza ratei, comandi ed effetto suolo)
+  function coeff(aDeg,fl){
+    const alpha=aDeg*D2R,aS=(ae.alfaStallo-1.5*fl)*D2R,aN=-12*D2R,dCLf=A.flap.CL*fl;
+    let CL,st=0;
+    if(alpha>aS){st=s01((alpha-aS)/(8*D2R));CL=lerp(ae.CL0+ae.CLalfa*aS+dCLf,Math.sin(2*alpha)*(1+0.3*fl),st);}
+    else if(alpha<aN){st=s01((aN-alpha)/(8*D2R));CL=lerp(ae.CL0+ae.CLalfa*aN+dCLf,Math.sin(2*alpha),st);}
+    else CL=ae.CL0+ae.CLalfa*alpha+dCLf;
+    const CD=ae.CD0+A.flap.CD*fl+kInd*CL*CL+1.2*Math.sin(alpha)**2*st;
+    return {CL,CD,st};
+  }
+  const gCL=FV.grafico(document.getElementById('cvCL'),{x:[-10,26],y:[-0.6,2.4],etX:'α (°)',etY:'CL',rapporto:0.8});
+  const gP=FV.grafico(document.getElementById('cvPol'),{x:[0,0.4],y:[-0.6,2.4],etX:'CD',etY:'CL',rapporto:0.8});
+  let al=4,fl=0;
+  function agg(){
+    const f=fl/30,c=coeff(al,f);
+    gCL.pulisci();gCL.assi();
+    if(f>0)gCL.curva(x=>coeff(x,0).CL,FV.colore('tenue'),1.2,[4,4]);
+    gCL.curva(x=>coeff(x,f).CL,FV.colore('accento'));
+    gCL.punto(al,c.CL,FV.colore('accento2'));
+    gP.pulisci();gP.assi();
+    // polare: curva parametrica in alfa
+    const xs=[],ys=[];for(let a=-10;a<=26;a+=0.25){const k=coeff(a,f);xs.push(k.CD);ys.push(k.CL);}
+    gP.serie(xs,ys,FV.colore('accento'));
+    // tangente dall'origine (massima efficienza)
+    let best=0,ab=0;for(let a=-5;a<=16;a+=0.05){const k=coeff(a,f);if(k.CL/k.CD>best){best=k.CL/k.CD;ab=a;}}
+    const kb=coeff(ab,f);gP.linea(0,0,0.4,0.4*kb.CL/kb.CD,FV.colore('verde'),1.2,[5,4]);
+    gP.punto(kb.CD,kb.CL,FV.colore('verde'),'E max '+FV.fmt(best,1),8,8);
+    gP.punto(c.CD,c.CL,FV.colore('accento2'));
+    document.getElementById('r-cl').textContent=FV.fmt(c.CL,3);
+    document.getElementById('r-cd').textContent=FV.fmt(c.CD,4);
+    document.getElementById('r-e').textContent=FV.fmt(c.CL/c.CD,1);
+    const V=c.CL>0.05?Math.sqrt(2*m*9.81/(1.225*S*c.CL)):NaN;
+    document.getElementById('r-v').textContent=Number.isFinite(V)?FV.fmt(V*FV.KT,0)+' kt ('+FV.fmt(V,1)+' m/s)':'—';
+    document.getElementById('r-st').innerHTML=c.st>0.01?'<b style="color:var(--accento2)">STALLO</b>':'';
+  }
+  FV.cursore('al',v=>{al=v;agg();},v=>FV.fmt(v,1)+'°').agg();
+  FV.cursore('fl',v=>{fl=v;agg();},v=>v+'°').agg();
+  window.addEventListener('resize',agg);
+});
+</script>
+</body>
+</html>

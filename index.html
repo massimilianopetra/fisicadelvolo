@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fisica del volo</title>
+<meta name="description" content="La matematica e la fisica dietro un simulatore di volo: forze aerodinamiche, corpo rigido a 6 gradi di libertà, stabilità, integrazione numerica, radionavigazione, autopilota. Per gli istituti tecnici.">
+<link rel="stylesheet" href="css/font.css">
+<link rel="stylesheet" href="lib/katex/katex.min.css">
+<link rel="stylesheet" href="css/stile.css">
+<script src="lib/katex/katex.min.js"></script>
+<script src="lib/katex/auto-render.min.js"></script>
+<script src="js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Fisica del volo</h1>
+<p class="sottotitolo">Come si fa volare un aereo dentro un computer: la teoria, le formule e i numeri del simulatore <b>Volo</b>.</p>
+
+<figure>
+  <img src="img/volo.jpg" alt="Il Cessna 172 del simulatore Volo in volo sopra il Piemonte" width="1280" height="720">
+  <figcaption>Il Cessna 172 del simulatore <a href="https://massimilianopetra.github.io/flightsimulator/" target="_blank" rel="noopener">Volo</a>, che gira nel browser. Tutto quello che vedi muoversi è calcolato con le formule di queste pagine.</figcaption>
+</figure>
+
+<h2>Di che cosa parla</h2>
+<p><b>Volo</b> è un simulatore di volo libero e gratuito, scritto in JavaScript, che si gioca nel browser: un Cessna 172 con il cruscotto G1000 (e un ultraleggero Ikarus C42) sopra il Piemonte vero, con il rilievo, gli aeroporti, le radio e l'autopilota. Queste pagine non spiegano come si gioca, ma <b>perché l'aereo si muove così</b>: quali leggi della fisica ci sono dentro, con quali formule, quali numeri e quali semplificazioni.</p>
+<p>Ogni capitolo parte dai principi (quelli dei libri di meccanica del volo), arriva alle formule usate davvero dal programma e mostra le righe di codice corrispondenti. Molti capitoli hanno un <b>laboratorio interattivo</b>: si muovono i cursori e si vede che cosa cambia.</p>
+
+<div class="box formula">
+  <div class="titolo">A chi è rivolto</div>
+  <p>Agli studenti e agli insegnanti degli istituti tecnici, in particolare dell'indirizzo <b>Trasporti e logistica</b> (Costruzioni aeronautiche, Conduzione del mezzo aereo), ma anche di meccanica, elettronica e informatica. Bastano trigonometria, vettori e un'idea di derivata; gli argomenti più avanzati (equazioni di Eulero, quaternioni, integrazione numerica) sono spiegati passo per passo, con esempi numerici.</p>
+</div>
+
+<h2>I capitoli</h2>
+<div class="schede" id="schede"></div>
+
+<h2>Come usarlo in classe</h2>
+<ul>
+  <li><b>Teoria → verifica</b>: si studia un fenomeno (per esempio la velocità di stallo), si fa il calcolo con i dati del Cessna, poi lo si prova nel simulatore e si confronta.</li>
+  <li><b>Esercizi “Prova tu”</b>: in ogni capitolo, con la soluzione nascosta.</li>
+  <li><b>Modificare il modello</b>: i parametri dell'aereo stanno in un file di testo (<code>dati/c172.js</code> nel simulatore). Si può cambiare un coefficiente, ricaricare la pagina e sentire la differenza in volo: un ottimo esercizio di laboratorio.</li>
+  <li><b>Leggere il codice</b>: il riquadro verde “Nel simulatore” di ogni capitolo indica le righe del programma che fanno quel calcolo.</li>
+</ul>
+
+<div class="box attenzione">
+  <div class="titolo">Un modello, non l'aereo vero</div>
+  <p>Il simulatore usa un modello <i>a coefficienti</i>: buono per capire e per volare in modo realistico, ma semplificato (aria senza turbolenza, elica descritta da una formula, niente deformazioni della struttura). Dove la realtà è diversa, il testo lo dice. Non è materiale per l'addestramento al volo.</p>
+</div>
+
+<h2>Il simulatore</h2>
+<p>Si gioca da <a href="https://massimilianopetra.github.io/flightsimulator/" target="_blank" rel="noopener">massimilianopetra.github.io/flightsimulator</a>; il codice sorgente (licenza GPL) è su <a href="https://github.com/massimilianopetra/flightsimulator" target="_blank" rel="noopener">GitHub</a>. Funziona su un normale PC, anche senza installare nulla.</p>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('schede').innerHTML=FV.CAPITOLI.map((c,i)=>{
+    const n=/^\d/.test(c.f)?'Capitolo '+(i+1):'Appendice';
+    return `<a class="scheda" href="capitoli/${c.f}"><span class="num">${n}</span><b>${c.t}</b><span>${c.d}</span></a>`;
+  }).join('');
+});
+</script>
+</body>
+</html>

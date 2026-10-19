@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Integrazione numerica e carrello — Fisica del volo</title>
+<link rel="stylesheet" href="../css/font.css">
+<link rel="stylesheet" href="../lib/katex/katex.min.css">
+<link rel="stylesheet" href="../css/stile.css">
+<script src="../lib/katex/katex.min.js"></script>
+<script src="../lib/katex/auto-render.min.js"></script>
+<script src="../js/c172.js"></script>
+<script src="../js/comune.js"></script>
+</head>
+<body>
+<main>
+<h1>Integrazione numerica e carrello</h1>
+<p class="sottotitolo">Il computer non sa fare derivate e integrali "veri": avanza a piccoli passi. Quanto piccoli, e come, decide se la simulazione sta in piedi.</p>
+
+<h2>Dal continuo ai passi</h2>
+<p>Le equazioni del moto (capitolo 7) sono <b>equazioni differenziali</b>: dicono quanto cambia lo stato in un istante, \(\dot{\mathbf s}=f(\mathbf s,t)\). Per conoscere lo stato fra un secondo bisogna integrarle. Quasi mai si può farlo con carta e penna; il computer allora divide il tempo in passi \(\Delta t\) e approssima.</p>
+<div class="box formula">
+  <div class="titolo">Tre metodi</div>
+  <p><b>Eulero esplicito</b> (il più semplice): \(\;x_{n+1}=x_n+v_n\Delta t,\quad v_{n+1}=v_n+a_n\Delta t\)</p>
+  <p><b>Eulero semi-implicito</b> (simplettico): prima la velocità, poi la posizione con la velocità <i>nuova</i>: \(\;v_{n+1}=v_n+a_n\Delta t,\quad x_{n+1}=x_n+v_{n+1}\Delta t\)</p>
+  <p><b>Runge-Kutta del 4° ordine</b> (RK4): valuta l'accelerazione quattro volte per passo e fa una media pesata; l'errore cala come \(\Delta t^4\).</p>
+</div>
+<p>La differenza fra i primi due sembra un dettaglio, ma è enorme: con Eulero esplicito una molla senza attrito <i>guadagna</i> energia a ogni passo e oscilla sempre di più; con il semi-implicito l'energia resta limitata. Il simulatore usa il semi-implicito (vedi il riquadro del capitolo 7: prima <code>vel</code>, poi <code>pos</code> con la velocità aggiornata) e fa <b>240 passi al secondo</b>, 4 per ogni fotogramma a 60 Hz.</p>
+
+<h3>La condizione di stabilità</h3>
+<p>Per un oscillatore di pulsazione \(\omega_n=\sqrt{k/m}\) il metodo semi-implicito è stabile solo se</p>
+$$\omega_n\,\Delta t<2\qquad\Longleftrightarrow\qquad \Delta t<\frac{2}{\omega_n}=2\sqrt{\frac mk}.$$
+<p>Le molle "rigide" hanno \(\omega_n\) alto e obbligano a passi piccoli. Per il carrello del Cessna (\(\omega_n\approx12{,}6\) rad/s) il limite è circa 1/6 di secondo: i 240 Hz del simulatore danno un margine di 40 volte. Il margine serve perché le forze del carrello cambiano bruscamente (in pochi millesimi una ruota passa da zero a migliaia di newton) e perché l'errore, anche quando il calcolo è stabile, cresce con il passo: con passi grandi il contatto si "sente" a scatti e l'atterraggio sembra più duro o più morbido del vero.</p>
+
+<h2>Il carrello: molla, smorzatore, attrito</h2>
+<p>Ogni ruota è un punto dell'aereo (in assi corpo). A ogni passo il programma calcola dove si trova rispetto al terreno; se è "sotto" di una profondità \(\delta\) (la compressione), nasce una forza verticale come quella di un ammortizzatore:</p>
+<div class="box formula">
+  <div class="titolo">Forza normale della ruota (modello di Kelvin-Voigt)</div>
+  $$N=\max\left(0,\;k\,\delta-c\,\dot z\right)$$
+  <p>\(k\) rigidezza (N/m), \(c\) smorzamento (N·s/m), \(\dot z\) velocità verticale del punto della ruota (positiva verso l'alto). Il <code>max(0, …)</code> c'è perché il terreno può spingere ma non tirare.</p>
+</div>
+<p>Il rapporto di smorzamento \(\zeta=\dfrac{c}{2\sqrt{k\,m}}\) dice come si ferma l'oscillazione: \(\zeta<1\) rimbalza qualche volta, \(\zeta=1\) torna a riposo nel tempo più breve senza rimbalzi, \(\zeta>1\) torna piano.</p>
+<table id="tabCarr">
+  <tr><th>Ruota</th><th>Rigidezza k</th><th>Smorzamento c</th><th>Note</th></tr>
+</table>
+<p>Lungo il terreno la ruota ha <b>attrito</b>: di rotolamento in avanti (\(\mu=0{,}02\) su asfalto, 0,06 sull'erba, fino a +0,6 con i freni), molto più forte di traverso (la gomma non vuole scivolare di lato, \(\mu=0{,}75\)). L'attrito è "regolarizzato": invece di un salto fra fermo e in movimento cresce con la velocità di scivolamento fino al limite \(\mu N\), così il calcolo non vibra.</p>
+$$F_{avanti}=-\operatorname{clamp}\left(15\,000\cdot v_{avanti},\;-\mu N,\;\mu N\right)$$
+
+<div class="lab">
+  <div class="titolo">Laboratorio — atterraggio su una molla</div>
+  <canvas id="cvMolla"></canvas>
+  <div class="comandi">
+    <label>Velocità di discesa <input type="range" id="vz" min="0.5" max="4" step="0.1" value="2"><output for="vz"></output></label>
+    <label>Passo di calcolo <select id="dt"><option value="240" selected>1/240 s (simulatore)</option><option value="60">1/60 s</option><option value="30">1/30 s</option><option value="20">1/20 s</option><option value="10">1/10 s</option><option value="6">1/6 s</option><option value="5">1/5 s</option></select></label>
+    <label>Smorzamento <input type="range" id="cc" min="0" max="2" step="0.05" value="1"><output for="cc"></output></label>
+  </div>
+  <div class="risultati"><span>ω<sub>n</sub>·Δt <b id="r-wdt"></b></span><span>ζ <b id="r-z"></b></span><span>compressione massima <b id="r-c"></b></span></div>
+  <p style="font-size:.86rem;color:var(--tenue)">Massa di 1000 kg sulle tre ruote del Cessna (rigidezze sommate), che tocca la pista scendendo alla velocità scelta, con tutto il peso sulle ruote (la portanza è ormai calata): rimbalza e si assesta alla compressione statica. Curva blu: Eulero semi-implicito; rossa: Eulero esplicito; grigia: RK4 (quasi la soluzione esatta). Lo smorzamento è un fattore sul valore del simulatore.</p>
+</div>
+
+<div class="box nelsim">
+  <div class="titolo">Nel simulatore</div>
+  <p>Il ciclo delle ruote (<a data-codice="js/fisica.js#L160-L193">js/fisica.js, righe 160–193</a>), qui ridotto all'essenziale:</p>
+<pre><code>for(const w of ruote){
+  rw.copy(w.p).applyQuaternion(st.q); pw.copy(st.pos).add(rw);  // ruota in assi terra
+  const pen=terra.suolo(pw.x,pw.z)-pw.y;                         // compressione
+  if(pen<=0) continue;                                           // in aria
+  vp.crossVectors(wW,rw).add(st.vel);                            // velocità del punto: v + ω×r
+  if(!w.contatto&&-vp.y>A.limiti.vsContatto) crash(...);         // troppo duro!
+  const Nf=Math.max(0,w.rigidezza*pen-w.smorzamento*vp.y);
+  const mu=w.pattino?0.45:(tipo==='erba'?0.06:0.02)+(w.freno?st.freno*0.6:0);
+  const Ff=-clamp(vf*15000,-mu*Nf,mu*Nf);      // rotolamento e freni
+  const Fs=-clamp(vs*20000,-0.75*Nf,0.75*Nf);  // aderenza laterale
+  fc.set(0,Nf,0).addScaledVector(fdir,Ff).addScaledVector(sdir,Fs);
+  Fw.add(fc); tmp.crossVectors(rw,fc); Tw.add(tmp);              // forza e momento r × F
+}</code></pre>
+  <p>Notare \(\vec v_{punto}=\vec v+\vec\omega\times\vec r\): la velocità di un punto di un corpo rigido che ruota. E il momento \(\vec r\times\vec F\) che la ruota esercita sull'aereo: è lui che abbassa il muso quando tocca il ruotino. Se una ruota tocca a più di 3,6 m/s (700 ft/min) il carrello si rompe.</p>
+</div>
+
+<div class="box prova">
+  <div class="titolo">Prova tu</div>
+  <ol>
+    <li>Calcola \(\omega_n\) e il passo massimo stabile per una ruota principale del Cessna (\(k=60\,000\) N/m) che porta 400 kg.</li>
+    <li>Calcola \(\zeta\) della stessa ruota con \(c=6000\) N·s/m. Rimbalza?</li>
+    <li>Con l'aereo fermo sulla pista, di quanto è compresso il carrello? (Usa le rigidezze della tabella e supponi il peso diviso 20% / 40% / 40%.)</li>
+  </ol>
+  <details><summary>Soluzioni</summary>
+    <ol>
+      <li>\(\omega_n=\sqrt{60\,000/400}=12{,}2\) rad/s (circa 2 Hz); \(\Delta t<2/12{,}2=0{,}16\) s. Il passo del simulatore (1/240 = 0,004 s) è 40 volte più piccolo: stabile e preciso.</li>
+      <li>\(\zeta=6000/(2\sqrt{60\,000\cdot400})=0{,}61\): rimbalza appena, e si ferma in meno di un'oscillazione.</li>
+      <li>Ruotino \(1962/40\,000=4{,}9\) cm; principali \(3924/60\,000=6{,}5\) cm.</li>
+    </ol>
+  </details>
+</div>
+</main>
+<script>
+window.addEventListener('load',()=>{
+  const C=window.AEREO.carrello,tb=document.getElementById('tabCarr');
+  for(const r of C)tb.insertAdjacentHTML('beforeend',`<tr><td>${r.nome}</td><td class="n">${FV.fmt(r.rigidezza)} N/m</td><td class="n">${FV.fmt(r.smorzamento)} N·s/m</td><td>${r.pattino?'pattino di coda: tocca solo se il muso è troppo alto':r.sterzante?'sterzante con i pedali':r.freno?'con freno':''}</td></tr>`);
+  const ruote=C.filter(r=>!r.pattino),K=ruote.reduce((a,r)=>a+r.rigidezza,0),C0=ruote.reduce((a,r)=>a+r.smorzamento,0),m=window.AEREO.massa;
+  const g=FV.grafico(document.getElementById('cvMolla'),{x:[0,2],y:[-0.2,0.1],etX:'tempo (s)',etY:'altezza della ruota (m)',rapporto:0.45});
+  let vz=2,hz=240,cc=1;
+  function sim(metodo){
+    const c=C0*cc,dt=1/hz,ts=[],zs=[];let z=0.05,v=-vz,maxC=0;
+    const acc=(z,v)=>{const pen=-z;return (pen>0?Math.max(0,K*pen-c*v)/m:0)-9.81;};   // tutto il peso sulle ruote
+    for(let t=0;t<=2+1e-9;t+=dt){
+      ts.push(t);zs.push(Math.max(-1,Math.min(1,z)));maxC=Math.max(maxC,-z);
+      if(metodo==='esp'){const a=acc(z,v);z+=v*dt;v+=a*dt;}
+      else if(metodo==='semi'){v+=acc(z,v)*dt;z+=v*dt;}
+      else{ // RK4 con passo fine
+        const h=dt/8;for(let i=0;i<8;i++){
+          const k1v=acc(z,v),k1z=v,k2v=acc(z+k1z*h/2,v+k1v*h/2),k2z=v+k1v*h/2,k3v=acc(z+k2z*h/2,v+k2v*h/2),k3z=v+k2v*h/2,k4v=acc(z+k3z*h,v+k3v*h),k4z=v+k3v*h;
+          v+=(k1v+2*k2v+2*k3v+k4v)*h/6;z+=(k1z+2*k2z+2*k3z+k4z)*h/6;}
+      }
+    }
+    return {ts,zs,maxC};
+  }
+  function agg(){
+    g.pulisci();g.assi();
+    const r=sim('rk4');g.serie(r.ts,r.zs,FV.colore('tenue'),1.4);
+    g.serie(...Object.values(sim('esp')).slice(0,2),FV.colore('accento2'),1.8);
+    const s=sim('semi');g.serie(s.ts,s.zs,FV.colore('accento'),2.4);
+    g.linea(0,0,2,0,FV.colore('verde'),1,[6,4]);g.testo(1.6,0.012,'pista',FV.colore('verde'));
+    const wn=Math.sqrt(K/m);
+    document.getElementById('r-wdt').textContent=FV.fmt(wn/hz,3)+(wn/hz>=2?' — instabile!':'');
+    document.getElementById('r-z').textContent=FV.fmt(C0*cc/(2*Math.sqrt(K*m)),2);
+    document.getElementById('r-c').textContent=FV.fmt(r.maxC*100,1)+' cm';
+  }
+  FV.cursore('vz',v=>{vz=v;agg();},v=>FV.fmt(v,1)+' m/s ('+FV.fmt(v*196.85)+' ft/min)').agg();
+  FV.cursore('cc',v=>{cc=v;agg();},v=>'× '+FV.fmt(v,2)).agg();
+  document.getElementById('dt').addEventListener('change',e=>{hz=+e.target.value;agg();});
+  window.addEventListener('resize',agg);
+});
+</script>
+</body>
+</html>
