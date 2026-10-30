@@ -24,9 +24,9 @@ FV.CAPITOLI=[
   {f:'appendice-dati.html',   t:'Appendice: i numeri del Cessna 172',    d:'Tutti i parametri del modello, con il loro significato.'},
   {f:'bibliografia.html',     t:'Per saperne di più',                    d:'Libri, corsi liberi e fonti dei dati.'},
 ];
-FV.SIMULATORE='https://massimilianopetra.github.io/flightsimulator/';
-FV.CODICE='https://github.com/massimilianopetra/flightsimulator/blob/main/';
-FV.MANUALE='https://massimilianopetra.github.io/flightsimulator/istruzioni.html';
+FV.SIMULATORE='https://volo-zq4.pages.dev/';
+FV.CODICE='https://volo-zq4.pages.dev/';   // i file del gioco come sono pubblicati (il repository è privato): le righe sono scritte nel testo
+FV.MANUALE='https://volo-zq4.pages.dev/istruzioni.html';
 
 const inCapitoli=/\/capitoli\//.test(location.pathname.replace(/\\/g,'/'));
 const base=inCapitoli?'../':'';
@@ -58,12 +58,12 @@ function impagina(){
   }
   const piede=document.createElement('footer');
   piede.innerHTML='Fisica del volo — la teoria dietro il simulatore <a href="'+FV.SIMULATORE+'" target="_blank" rel="noopener">Volo</a> '+
-    '(<a href="'+FV.MANUALE+'" target="_blank" rel="noopener">manuale del gioco</a>, <a href="https://github.com/massimilianopetra/flightsimulator" target="_blank" rel="noopener">codice</a>). '+
+    '(<a href="'+FV.MANUALE+'" target="_blank" rel="noopener">manuale del gioco</a>, <a href="'+FV.CODICE+'js/fisica.js" target="_blank" rel="noopener">codice</a>). '+
     '© 2026 Massimiliano Petra · <a href="mailto:massimiliano.petra@gmail.com">massimiliano.petra@gmail.com</a> · testi e figure con licenza <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.it" target="_blank" rel="noopener">CC BY-SA 4.0</a> · '+
     'formule disegnate con KaTeX (licenza MIT), caratteri B612 (SIL OFL).';
   document.body.appendChild(piede);
   // collegamenti al codice del simulatore: <a data-codice="js/fisica.js#L97">
-  for(const a of document.querySelectorAll('a[data-codice]')){a.href=FV.CODICE+a.dataset.codice;a.target='_blank';a.rel='noopener';}
+  for(const a of document.querySelectorAll('a[data-codice]')){a.href=FV.CODICE+a.dataset.codice.replace(/#.*/,'');a.target='_blank';a.rel='noopener';}
 }
 
 /* ---------- formule ---------- */

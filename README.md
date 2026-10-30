@@ -1,6 +1,6 @@
 # Fisica del volo
 
-La teoria dietro il simulatore di volo **[Volo](https://massimilianopetra.github.io/flightsimulator/)**: forze aerodinamiche, atmosfera, prestazioni, elica, stabilità, corpo rigido a 6 gradi di libertà, integrazione numerica, radionavigazione e autopilota. Con le formule, i numeri del Cessna 172 del simulatore e le righe di codice che fanno ogni calcolo.
+La teoria dietro il simulatore di volo **[Volo](https://volo-zq4.pages.dev/)**: forze aerodinamiche, atmosfera, prestazioni, elica, stabilità, corpo rigido a 6 gradi di libertà, integrazione numerica, radionavigazione e autopilota. Con le formule, i numeri del Cessna 172 del simulatore e le righe di codice che fanno ogni calcolo.
 
 Pensato per gli **istituti tecnici** (in particolare l'indirizzo Trasporti e logistica – Costruzioni aeronautiche e Conduzione del mezzo aereo): bastano trigonometria, vettori e un'idea di derivata.
 
