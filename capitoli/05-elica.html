@@ -60,6 +60,71 @@ $$\dot m_{carb}=c_{min}+(c_{max}-c_{min})\,\min\!\left(1,\left(\frac{n}{n_{max}}
   </div>
 </div>
 
+<h2>L'elica a passo variabile (a giri costanti)</h2>
+<p>Ogni sezione di pala è un piccolo profilo alare che si muove in due direzioni insieme: gira, con velocità \(\omega r\), e avanza con l'aereo, con velocità \(V\). L'aria la colpisce lungo la loro somma, inclinata dell'<b>angolo d'avanzamento</b> \(\varphi\). La pala è calettata con l'<b>angolo di passo</b> \(\beta\); l'angolo d'attacco vero è la differenza:</p>
+<div class="box formula">
+  <div class="titolo">Angolo d'attacco di una sezione di pala</div>
+  $$\alpha_{pala}=\beta-\varphi,\qquad \varphi=\arctan\frac{V}{\omega\,r}$$
+  <p>\(\beta\) passo (fisso o comandato), \(\omega\) velocità angolare dell'elica, \(r\) distanza dal mozzo.</p>
+</div>
+<p>Facciamo i conti a tre quarti del raggio di un'elica da 1,93 m (\(r=0{,}72\) m) che gira a 2700 giri: \(\omega r=2700\cdot2\pi/60\cdot0{,}72=204\) m/s.</p>
+<ul>
+  <li>da fermi \(\varphi=0°\): la pala lavora con tutto il suo passo;</li>
+  <li>a 80 nodi (41 m/s) \(\varphi=11{,}4°\);</li>
+  <li>a 160 nodi (82 m/s) \(\varphi=21{,}9°\).</li>
+</ul>
+<p>Con un passo fisso di 20° la pala avrebbe 20° d'attacco da ferma (è in stallo: tanta coppia, poca spinta, il motore non sale di giri) e −2° a 160 nodi (non spinge più, anzi frena). Un'elica a passo fisso è quindi sempre un <b>compromesso</b>: un passo corto è buono in decollo e in salita ma in crociera fa girare troppo il motore; un passo lungo è buono in crociera ma in decollo il motore non sviluppa tutta la potenza. È come un'automobile con una sola marcia.</p>
+<p>L'elica a <b>passo variabile</b> risolve il problema girando le pale nel mozzo, come se cambiasse marcia di continuo. Quasi sempre è <b>a giri costanti</b>: il pilota non sceglie il passo ma i <b>giri</b>, con una leva apposita (blu, accanto alla manetta nera). Un <b>regolatore</b> (governor) sul motore, fatto di masse centrifughe che comandano una valvola dell'olio, fa il resto:</p>
+<ul>
+  <li>se i giri superano quelli scelti, le masse si allargano e l'olio allunga il passo: la pala "morde" più aria, assorbe più coppia, il motore rallenta;</li>
+  <li>se i giri scendono, il passo si accorcia e il motore riprende giri.</li>
+</ul>
+<p>È un anello di controllo in retroazione, come quelli dell'autopilota del capitolo 10. Quando la pala è già tutta corta (<b>passo fine</b>, al fermo meccanico) il regolatore non può fare più nulla: con poca manetta e poca velocità i giri scendono sotto quelli scelti e l'elica si comporta come una a passo fisso.</p>
+
+<h3>Due leve, due strumenti</h3>
+<p>Con il passo fisso la manetta comanda i giri e il contagiri dice la potenza. Con i giri costanti i giri non dicono più nulla sulla potenza, perché il regolatore li tiene fermi. Serve un secondo strumento, il <b>manometro della pressione d'aspirazione</b> (MP, <i>manifold pressure</i>, in pollici di mercurio): misura la pressione nel collettivo dopo la farfalla. Più la farfalla è aperta, più aria entra a ogni ciclo e più coppia dà il motore. La potenza è coppia per velocità angolare:</p>
+$$P=Q\,\omega\quad\Rightarrow\quad P\;\text{cresce con}\;\text{MP}\times\text{giri}$$
+<p>così la <b>manetta comanda la MP</b> e la <b>leva dell'elica comanda i giri</b>; la potenza dipende da tutte e due. Un motore aspirato non può superare la pressione dell'aria esterna: 29,9 pollici al livello del mare, circa 23,5 pollici a 2000 m. Per questo in quota la MP massima scende anche con la manetta tutta avanti.</p>
+<p>Le regole che il pilota impara:</p>
+<ul>
+  <li><b>decollo e atterraggio</b>: leva dell'elica tutta avanti (giri massimi, passo corto), così in una riattaccata tutta la potenza è subito disponibile;</li>
+  <li><b>per aumentare la potenza</b> prima si alzano i giri, poi la manetta; <b>per ridurla</b> prima si toglie manetta, poi si abbassano i giri. Così non si ha mai molta MP con pochi giri, che sforza il motore (come tirare in salita in quinta marcia);</li>
+  <li><b>in crociera</b> si riducono i giri (per esempio 2350): l'elica gira più lenta con le pale più inclinate, rende meglio, fa meno rumore e il motore consuma meno.</li>
+</ul>
+
+<h3>Il modello del simulatore (SIAI-Marchetti SF.260)</h3>
+<p>Nel simulatore l'elica a giri costanti c'è sullo SF.260 (Lycoming O-540 da 260 CV, elica Hartzell bipala da 1,93 m). Anche qui niente pale e profili: bastano tre regole. I <b>giri</b> sono quelli della leva \(n_{sel}\) (da 2000 a 2700), ma non più di quelli che il motore raggiunge col passo tutto fine:</p>
+$$n=\min\!\left(n_{sel},\;n_{min}+(1{,}1\,n_{max}-n_{min})\,\delta_t^{0{,}6}+14\,u\right)$$
+<p>Meno giri vogliono dire meno potenza, quindi meno spinta e meno benzina. La <b>pressione d'aspirazione</b> è quella dell'aria esterna strozzata dalla farfalla:</p>
+<div class="box formula">
+  <div class="titolo">Elica a giri costanti</div>
+  $$k_n=0{,}7+0{,}3\,\frac{n}{n_{max}}\qquad T=\left(0{,}03+0{,}97\,\delta_t\right)k_n\,T_0\,\max\!\left(0,\;1-\frac{u}{V_{max}}\right)\frac{\rho}{\rho_0}$$
+  $$\text{MP}=p_{aria}\,(0{,}32+0{,}66\,\delta_t)\qquad \dot m_{carb}=c_{min}+(c_{max}-c_{min})\,\min\!\left(1,\;\delta_t^{1{,}3}\,k_n\,\frac{\rho}{\rho_0}\right)$$
+  <p>SF.260: \(T_0=4000\) N, \(V_{max}=150\) m/s (l'elica a passo variabile spinge bene anche veloce), \(c_{min}=10\) e \(c_{max}=92\) litri all'ora, 243 litri nei serbatoi.</p>
+</div>
+<p>In crociera (manetta 65%, 2350 giri, livello del mare): \(k_n=0{,}7+0{,}3\cdot0{,}87=0{,}96\), \(0{,}65^{1{,}3}=0{,}57\), consumo \(10+82\cdot0{,}57\cdot0{,}96=55\) l/h e MP \(29{,}9\cdot(0{,}32+0{,}43)=22{,}4\) pollici. Il piano di volo del gioco usa 52 l/h per la crociera dello SF.260.</p>
+
+<div class="lab">
+  <div class="titolo">Laboratorio — passo fisso e giri costanti</div>
+  <canvas id="cvG"></canvas>
+  <div class="comandi">
+    <label>Manetta <input type="range" id="thr2" min="0" max="100" step="5" value="65"><output for="thr2"></output></label>
+    <label>Leva dell'elica <input type="range" id="leva" min="2000" max="2700" step="50" value="2350"><output for="leva"></output></label>
+    <label>Velocità <input type="range" id="vel2" min="0" max="200" step="1" value="150"><output for="vel2"></output></label>
+    <label>Quota <input type="range" id="hq2" min="0" max="3500" step="100" value="0"><output for="hq2"></output></label>
+  </div>
+  <div class="risultati">
+    <span>giri SF.260 <b id="r2-n"></b></span><span>regolatore <b id="r2-reg"></b></span><span>MP <b id="r2-mp"></b></span>
+    <span>spinta <b id="r2-t"></b></span><span>consumo <b id="r2-c"></b></span><span>giri Cessna 172 <b id="r2-n172"></b></span>
+  </div>
+  <p>Linea gialla: giri dello SF.260 al variare della velocità (piatta dove lavora il regolatore, sotto la linea blu della leva). Linea grigia tratteggiata: giri del Cessna 172 a passo fisso con la stessa manetta, che salgono sempre con la velocità.</p>
+</div>
+
+<div class="box attenzione">
+  <div class="titolo">Quello che il modello dell'elica a giri costanti non ha</div>
+  <p>Nel simulatore la MP dipende solo da manetta e quota, non dai giri; il regolatore risponde con la stessa costante di tempo del motore (0,4 s); non si rompe nulla con molta MP e pochi giri; mancano la <b>messa in bandiera</b> (pale parallele al vento con il motore fermo, per planare meglio: c'è sui bimotori, non sullo SF.260) e la <b>fuga di giri</b> (overspeed) quando il regolatore si guasta.</p>
+</div>
+
 <h2>Il soffio dell'elica sulla coda</h2>
 <p>Dietro il disco l'aria ha una pressione totale più alta di \(\Delta p=T/A\) (è proprio il salto di pressione del disco). Il timone e l'elevatore stanno in parte dentro questo "soffio": anche da fermi, con il motore su di giri, il timone funziona. Il simulatore lo rappresenta aumentando la pressione dinamica vista dai comandi di coda:</p>
 $$\bar q_{elevatore}=\bar q+0{,}15\,\frac{T}{A},\qquad \bar q_{timone}=\bar q+0{,}4\,\frac{T}{A}$$
@@ -72,13 +137,19 @@ $$\bar q_{elevatore}=\bar q+0{,}15\,\frac{T}{A},\qquad \bar q_{timone}=\bar q+0{
 
 <div class="box nelsim">
   <div class="titolo">Nel simulatore</div>
-  <p>Motore ed elica in <a data-codice="js/fisica.js#L111-L128">js/fisica.js, righe 111–128</a>; il soffio sulla coda alla <a data-codice="js/fisica.js#L146">riga 146</a>:</p>
-<pre><code>const giriT=acceso?Math.max(A.motore.giriMin+(A.motore.giriMax-A.motore.giriMin)
+  <p>Motore ed elica in <a data-codice="js/fisica.js#L136-L161">js/fisica.js, righe 136–161</a> (<code>CS</code> è vero per l'elica a giri costanti, cioè quando i dati dell'aereo hanno <code>giriCostanti: true</code>, come in <code>dati/sf260.js</code>); il soffio sulla coda alla <a data-codice="js/fisica.js#L179">riga 179</a>:</p>
+<pre><code>let giriT=acceso?Math.max(A.motore.giriMin+(A.motore.giriMax-A.motore.giriMin)
       *Math.pow(st.thr,0.8)*(0.82+0.18*Math.min(1,uP/60)), ...):uP*12*kGiri;
+if(CS) giriT=Math.min(st.giriSel,acceso?A.motore.giriMin
+      +(A.motore.giriMax*1.1-A.motore.giriMin)*Math.pow(st.thr,0.6)+uP*14:uP*14);
 st.rpm+=(giriT-st.rpm)*Math.min(1,dt*2.5);
-const T=acceso?(0.03+0.97*st.thr)*A.motore.spintaStatica
+const kLeva=CS?0.7+0.3*clamp(st.rpm/A.motore.giriMax,0,1):1;
+const T=acceso?(0.03+0.97*st.thr)*kLeva*A.motore.spintaStatica
       *Math.max(0,1-Math.max(0,u)/A.motore.velocitaMaxElica)*(rho/1.225):0;
-const pot=Math.min(1,Math.pow(Math.max(0,st.rpm)/A.motore.giriMax,3)*(rho/1.225));
+const pAria=29.92*Math.pow(Math.max(0.2,1-2.2558e-5*st.pos.y),5.2559);
+st.mp=acceso&&st.rpm>300?pAria*(0.32+0.66*st.thr):pAria;
+const pot=Math.min(1,(CS?Math.pow(st.thr,1.3)*kLeva
+      :Math.pow(Math.max(0,st.rpm)/A.motore.giriMax,3))*(rho/1.225));
 st.flusso=acceso?cb2.consumoMin+(cb2.consumoMax-cb2.consumoMin)*pot:0;
 ...
 const qE=qbar+0.15*T/disco, qR=qbar+0.4*T/disco;</code></pre>
@@ -91,12 +162,14 @@ const qE=qbar+0.15*T/disco, qR=qbar+0.4*T/disco;</code></pre>
     <li>Quanta spinta dà il modello a tutta manetta a 70 nodi al livello del mare? E a 2000 m?</li>
     <li>Con la teoria del disco attuatore, quale velocità ha il soffio dell'elica (lontano dietro) a punto fisso?</li>
     <li>Un viaggio di 300 km a 100 nodi con un consumo di 8,5 gal/h: quanto carburante serve, con 30 minuti di riserva?</li>
+    <li>Un'elica a passo fisso ha le pale calettate a 18° a tre quarti del raggio (\(r=0{,}72\) m) e gira a 2500 giri. A quale velocità l'angolo d'attacco della pala si annulla? Perché un'elica a giri costanti non ha questo limite?</li>
   </ol>
   <details><summary>Soluzioni</summary>
     <ol>
       <li>70 nodi = 36 m/s; \(T=2800(1-36/102)=1812\) N. A 2000 m \(\rho/\rho_0=0{,}822\): 1489 N.</li>
       <li>\(2v_i=40\) m/s, circa 78 nodi: più veloce di quanto l'aereo voli in salita.</li>
       <li>300 km = 162 NM, 1,62 h di volo + 0,5 h = 2,12 h; \(2{,}12\cdot8{,}5=18\) galloni (68 litri).</li>
+      <li>\(\omega r=2500\cdot2\pi/60\cdot0{,}72=188{,}5\) m/s; \(\alpha=0\) quando \(\varphi=18°\): \(V=188{,}5\cdot\tan18°=61{,}2\) m/s, circa 119 nodi. Con i giri costanti il regolatore allunga il passo man mano che si accelera: \(\beta\) segue \(\varphi\) e la pala resta sempre con un angolo d'attacco utile.</li>
     </ol>
   </details>
 </div>
@@ -125,6 +198,37 @@ window.addEventListener('load',()=>{
   FV.cursore('vel',v=>{vel=v;agg();},v=>v+' kt').agg();
   FV.cursore('hq',v=>{hq=v;agg();},v=>FV.fmt(v)+' m').agg();
   window.addEventListener('resize',agg);
+
+  // elica a giri costanti: numeri dello SF.260 (dati/sf260.js del simulatore)
+  const S={giriMin:700,giriMax:2700,T0:4000,vMax:150,cMin:10,cMax:92};
+  let thr2=0.65,leva=2350,vel2=150,hq2=0;
+  const g2=FV.grafico(document.getElementById('cvG'),{x:[0,200],y:[0,3200],etX:'velocità (kt)',etY:'giri/min',rapporto:0.42});
+  const sig2=()=>Math.pow(1-2.2558e-5*hq2,4.2559);
+  const fine=kt=>S.giriMin+(S.giriMax*1.1-S.giriMin)*Math.pow(thr2,0.6)+kt/KT*14;   // giri col passo tutto fine
+  const giriSF=kt=>Math.min(leva,fine(kt));
+  const giri172=kt=>M.giriMin+(M.giriMax-M.giriMin)*Math.pow(thr2,0.8)*(0.82+0.18*Math.min(1,kt/KT/60));
+  function agg2(){
+    g2.pulisci();g2.assi();
+    g2.linea(0,leva,200,leva,FV.colore('accento'),1.5,[6,4]);
+    g2.curva(giri172,FV.colore('tenue'),2,[5,4]);
+    g2.curva(giriSF,FV.colore('giallo'),2.6);
+    const n=giriSF(vel2);g2.punto(vel2,n,FV.colore('accento2'));
+    const kn=0.7+0.3*Math.min(1,n/S.giriMax),u=vel2/KT;
+    const T=(0.03+0.97*thr2)*kn*S.T0*Math.max(0,1-u/S.vMax)*sig2();
+    const mp=29.92*Math.pow(1-2.2558e-5*hq2,5.2559)*(0.32+0.66*thr2);
+    const c=S.cMin+(S.cMax-S.cMin)*Math.min(1,Math.pow(thr2,1.3)*kn*sig2());
+    document.getElementById('r2-n').textContent=FV.fmt(Math.round(n/10)*10);
+    document.getElementById('r2-reg').textContent=fine(vel2)>leva?'tiene i giri':'passo tutto fine';
+    document.getElementById('r2-mp').textContent=FV.fmt(mp,1)+' inHg';
+    document.getElementById('r2-t').textContent=FV.fmt(T)+' N';
+    document.getElementById('r2-c').textContent=FV.fmt(c,0)+' l/h';
+    document.getElementById('r2-n172').textContent=FV.fmt(Math.round(giri172(vel2)/10)*10);
+  }
+  FV.cursore('thr2',v=>{thr2=v/100;agg2();},v=>v+'%').agg();
+  FV.cursore('leva',v=>{leva=v;agg2();},v=>FV.fmt(v)+' giri').agg();
+  FV.cursore('vel2',v=>{vel2=v;agg2();},v=>v+' kt').agg();
+  FV.cursore('hq2',v=>{hq2=v;agg2();},v=>FV.fmt(v)+' m').agg();
+  window.addEventListener('resize',agg2);
 });
 </script>
 </body>

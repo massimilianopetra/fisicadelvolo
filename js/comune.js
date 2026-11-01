@@ -15,7 +15,7 @@ FV.CAPITOLI=[
   {f:'02-atmosfera.html',     t:'L\'atmosfera e le velocità',            d:'Densità con la quota, pressione dinamica, velocità indicata e vera.'},
   {f:'03-aerodinamica.html',  t:'Portanza e resistenza',                 d:'Coefficienti, curva di portanza, stallo, polare, resistenza indotta.'},
   {f:'04-prestazioni.html',   t:'Prestazioni: crociera, salita, virata', d:'Equilibrio delle forze, fattore di carico, raggio di virata, planata, vento.'},
-  {f:'05-elica.html',         t:'Motore ed elica',                       d:'Spinta, potenza, giri dell\'elica a passo fisso, consumo di carburante.'},
+  {f:'05-elica.html',         t:'Motore ed elica',                       d:'Spinta, potenza, elica a passo fisso e a giri costanti, pressione d\'aspirazione, consumo di carburante.'},
   {f:'06-stabilita.html',     t:'Momenti e stabilità',                   d:'Derivate di stabilità, trim, stabilità statica e dinamica, comandi.'},
   {f:'07-corpo-rigido.html',  t:'Il corpo rigido a 6 gradi di libertà',  d:'Newton ed Eulero, momenti d\'inerzia, quaternioni, l\'effetto racchetta.'},
   {f:'08-integrazione.html',  t:'Integrazione numerica e carrello',      d:'Dal continuo ai passi di calcolo, molle e smorzatori, attrito delle ruote.'},
